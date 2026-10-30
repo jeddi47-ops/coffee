@@ -1,0 +1,16 @@
+{
+  "name": "cafe-qr-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Backend Supabase Café QR (V1) : scripts d'administration",
+  "engines": { "node": ">=20.6" },
+  "scripts": {
+    "create-cafe": "node --env-file=.env scripts/create-cafe.mjs",
+    "generate-qr": "node --env-file=.env scripts/generate-qr.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "qrcode": "^1.5.4"
+  }
+}
