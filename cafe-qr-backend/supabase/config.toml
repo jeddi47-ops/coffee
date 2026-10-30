@@ -1,0 +1,74 @@
+# Café QR (V1) : configuration Supabase CLI.
+# Si vous avez déjà un config.toml généré par `supabase init`, fusionnez-y
+# au minimum les sections [functions.*] ci-dessous.
+
+project_id = "cafe-qr"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 15
+
+[db.seed]
+enabled = true
+sql_paths = ["./seed.sql"]
+
+[realtime]
+enabled = true
+
+[storage]
+enabled = true
+file_size_limit = "2MiB"
+
+[auth]
+enabled = true
+site_url = "http://localhost:5173"
+additional_redirect_urls = ["http://localhost:5173/**"]
+jwt_expiry = 3600
+enable_signup = true
+enable_anonymous_sign_ins = false
+
+[auth.email]
+enable_signup = true
+enable_confirmations = true
+# Lien magique (OTP par email) pour les clients
+otp_expiry = 3600
+
+[edge_runtime]
+enabled = true
+policy = "per_worker"
+
+# ---------------------------------------------------------------------------
+# Edge Functions
+# Publiques (client en salle, jeton de table) : verify_jwt = false
+# Personnel : verify_jwt = true (+ revérification du rôle dans le code)
+# ---------------------------------------------------------------------------
+[functions.get-menu]
+verify_jwt = false
+
+[functions.get-table-state]
+verify_jwt = false
+
+[functions.create-order]
+verify_jwt = false
+
+[functions.cancel-order]
+verify_jwt = false
+
+[functions.call-waiter]
+verify_jwt = false
+
+[functions.unsubscribe]
+verify_jwt = false
+
+[functions.create-staff]
+verify_jwt = true
+
+[functions.send-announcement]
+verify_jwt = true
