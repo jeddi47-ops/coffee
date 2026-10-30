@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Thème par défaut. Remplacé par le thème du café (réglages owner, section 14 du cahier). */
+:root {
+  --accent: #b4532a;
+  --surface: #fbf8f4;
+  --ink: #1d1b19;
+  --muted: #6b655e;
+  --radius: 14px;
+}
+
+body {
+  @apply bg-surface text-ink antialiased;
+  overflow-x: hidden;
+}
+
+button, a { min-height: 44px; }
