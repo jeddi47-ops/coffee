@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Search } from "lucide-react";
 import type { Menu, MenuProduct } from "../types/api";
 import { CafeHeader } from "./CafeHeader";
-import { FeaturedCard, ProductRow } from "./ProductCard";
+import { FeaturedCarousel, ProductRow } from "./ProductCard";
 import { fr } from "../i18n/fr";
 import { cn } from "../lib/utils";
 
@@ -17,6 +17,8 @@ export function MenuView({
   showTable = true,
   footer,
   stickyOffset = 0,
+  externalQuery,
+  belowHeader,
 }: {
   menu: Menu;
   onAdd?: (p: MenuProduct) => void;
@@ -24,12 +26,15 @@ export function MenuView({
   showTable?: boolean;
   footer?: ReactNode;
   stickyOffset?: number;
+  /** Si défini, la recherche est pilotée de l'extérieur (menu latéral) et le champ n'est pas affiché ici. */
+  externalQuery?: string;
+  belowHeader?: ReactNode;
 }) {
   const [query, setQuery] = useState("");
   const [active, setActive] = useState<string | null>(menu.categories[0]?.id ?? null);
   const pillsRef = useRef<HTMLDivElement>(null);
   const currency = menu.cafe.currency;
-  const q = normalize(query.trim());
+  const q = normalize((externalQuery ?? query).trim());
 
   const categories = useMemo(() => {
     const sorted = [...menu.categories].sort((a, b) => a.position - b.position);
@@ -52,7 +57,7 @@ export function MenuView({
     let frame = 0;
     const update = () => {
       frame = 0;
-      const limit = stickyOffset + 140;
+      const limit = stickyOffset + 100;
       let current: string | null = categories[0]?.id ?? null;
       for (const c of categories) {
         const el = document.getElementById(`cat-${c.id}`);
@@ -92,27 +97,31 @@ export function MenuView({
         tableLabel={showTable ? fr.menu.tableLabel(menu.table.label) : undefined}
       />
 
-      <div className="px-4">
-        <label htmlFor="menu-search" className="sr-only">{fr.menu.searchLabel}</label>
-        <div className="flex min-h-[48px] items-center gap-2 rounded-full border border-line bg-surface px-4 focus-within:ring-2 focus-within:ring-accent">
-          <Search className="h-5 w-5 shrink-0 text-muted" aria-hidden="true" />
-          <input
-            id="menu-search"
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={fr.menu.searchPlaceholder}
-            className="min-h-[46px] w-full bg-transparent text-base text-ink placeholder:text-muted focus-visible:outline-none"
-            autoComplete="off"
-          />
+      {belowHeader}
+
+      {externalQuery === undefined && (
+        <div className="px-4">
+          <label htmlFor="menu-search" className="sr-only">{fr.menu.searchLabel}</label>
+          <div className="flex min-h-[48px] items-center gap-2 rounded-full border border-line bg-surface px-4 focus-within:ring-2 focus-within:ring-accent">
+            <Search className="h-5 w-5 shrink-0 text-muted" aria-hidden="true" />
+            <input
+              id="menu-search"
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder={fr.menu.searchPlaceholder}
+              className="min-h-[46px] w-full bg-transparent text-base text-ink placeholder:text-muted focus-visible:outline-none"
+              autoComplete="off"
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {categories.length > 0 && (
         <nav
           aria-label={fr.menu.categoriesNav}
-          className="sticky z-20 mt-3 bg-bg py-2"
-          style={{ top: stickyOffset }}
+          className="sticky z-20 mt-1 bg-bg py-2"
+          style={{ top: `calc(${stickyOffset}px + env(safe-area-inset-top, 0px))` }}
         >
           <div ref={pillsRef} className="no-scrollbar flex gap-2 overflow-x-auto px-4">
             {categories.map((c) => (
@@ -135,12 +144,10 @@ export function MenuView({
       )}
 
       {featured.length > 0 && (
-        <section aria-labelledby="featured-title" className="pt-4">
-          <h2 id="featured-title" className="px-4 text-lg font-bold">{fr.menu.featured}</h2>
-          <div className="no-scrollbar mt-3 flex snap-x gap-3 overflow-x-auto px-4 pb-1">
-            {featured.map((p) => (
-              <FeaturedCard key={p.id} product={p} currency={currency} qty={cartQty[p.id] ?? 0} onAdd={onAdd} />
-            ))}
+        <section aria-labelledby="featured-title" className="px-4 pt-2">
+          <h2 id="featured-title" className="text-lg font-bold">{fr.menu.featured}</h2>
+          <div className="mt-3">
+            <FeaturedCarousel products={featured} currency={currency} cartQty={cartQty} onAdd={onAdd} />
           </div>
         </section>
       )}
@@ -149,7 +156,7 @@ export function MenuView({
       {q && categories.length === 0 && <p className="px-4 py-10 text-center text-muted">{fr.menu.noResults}</p>}
 
       {categories.map((c) => (
-        <section key={c.id} id={`cat-${c.id}`} aria-labelledby={`cat-title-${c.id}`} className="scroll-mt-[72px] px-4 pt-6">
+        <section key={c.id} id={`cat-${c.id}`} aria-labelledby={`cat-title-${c.id}`} className="scroll-mt-[9rem] px-4 pt-5">
           <h2 id={`cat-title-${c.id}`} className="mb-3 text-lg font-bold">{c.name}</h2>
           <div className="space-y-3">
             {[...c.products]
