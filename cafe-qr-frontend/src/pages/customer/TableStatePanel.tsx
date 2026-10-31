@@ -18,6 +18,7 @@ export function TableStatePanel({
   currency,
   refresh,
   applyServerTotal,
+  inline = false,
 }: {
   open: boolean;
   onClose: () => void;
@@ -26,6 +27,8 @@ export function TableStatePanel({
   currency: string;
   refresh: () => Promise<void>;
   applyServerTotal: (cents: number) => void;
+  /** true : affiché comme une page (onglet « Ma table »), sans fenêtre modale. */
+  inline?: boolean;
 }) {
   const cancelKeys = useCartStore((s) => s.cancelKeys);
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -49,8 +52,8 @@ export function TableStatePanel({
 
   const cur = state?.currency || currency;
 
-  return (
-    <Dialog open={open} onClose={onClose} title={fr.table.title} side="bottom" className="mx-auto max-w-2xl">
+  const content = (
+    <>
       {!state ? (
         <p className="py-6 text-center text-muted">{fr.common.loading}</p>
       ) : (
@@ -111,6 +114,13 @@ export function TableStatePanel({
           </div>
         </>
       )}
+    </>
+  );
+
+  if (inline) return content;
+  return (
+    <Dialog open={open} onClose={onClose} title={fr.table.title} side="bottom" className="mx-auto max-w-2xl">
+      {content}
     </Dialog>
   );
 }
