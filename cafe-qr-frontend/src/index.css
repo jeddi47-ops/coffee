@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Thème neutre de la plateforme (/staff, /admin, /compte, /login).
+   La zone client remplace ces variables par le thème du café (src/lib/theme.ts). */
+:root {
+  --bg: #f5f4f2;
+  --surface: #ffffff;
+  --surface-2: #ecebe8;
+  --ink: #18181b;
+  --muted: #5f5e66;
+  --line: #dddcd8;
+  --overlay: rgba(15, 15, 18, 0.55);
+  --accent: #1c1917;
+  --accent-foreground: #ffffff;
+  --accent-soft: #e7e5e4;
+  --danger: #b42318;
+  --danger-foreground: #ffffff;
+  --success: #1e7a46;
+  --warn: #9a5b00;
+  --warn-soft: #fff1d6;
+  --radius: 14px;
+  color-scheme: light;
+}
+
+/* Écran du personnel en faible lumière : contraste élevé sur fond sombre. */
+[data-theme="dark"] {
+  color-scheme: dark;
+  --danger: #ff6b5e;
+  --danger-foreground: #1a0503;
+  --success: #4ade80;
+  --warn: #ffb547;
+  --warn-soft: #3a2a10;
+}
+.staff-night {
+  --bg: #0b0b0c;
+  --surface: #17171a;
+  --surface-2: #232327;
+  --ink: #fafafa;
+  --muted: #b4b4bb;
+  --line: #34343a;
+  --accent: #fafafa;
+  --accent-foreground: #0b0b0c;
+  --accent-soft: #2a2a2f;
+}
+
+@layer base {
+  html, body { background: var(--bg); color: var(--ink); }
+  body { @apply antialiased; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
+
+.safe-bottom { padding-bottom: max(env(safe-area-inset-bottom), 0.5rem); }
+
+/* Impression des plaquettes de table (A4, 6 par page) : seul le portail .print-portal est imprimé. */
+.print-portal { display: none; }
+@media print {
+  @page { size: A4; margin: 10mm; }
+  html, body { background: #fff; }
+  body > *:not(.print-portal) { display: none !important; }
+  .print-portal { display: block; color: #000; }
+  .plate { break-inside: avoid; page-break-inside: avoid; }
+}
