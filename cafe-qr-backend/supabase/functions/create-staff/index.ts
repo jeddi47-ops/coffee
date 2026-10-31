@@ -25,7 +25,7 @@ Deno.serve(handle(async (req) => {
 
   const { data: invited, error: inviteError } = await admin.auth.admin.inviteUserByEmail(body.email, {
     data: { signup_type: "staff", display_name: body.display_name },
-    redirectTo: siteUrl ? `${siteUrl}/staff` : undefined,
+    redirectTo: siteUrl ? `${siteUrl}/auth/callback` : undefined,
   });
 
   if (inviteError || !invited?.user) {
