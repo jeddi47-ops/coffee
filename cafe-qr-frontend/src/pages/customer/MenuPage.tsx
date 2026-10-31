@@ -1,7 +1,7 @@
 // /m/:token : page d'entrée du QR (menu, panier, suivi de table, appel serveur).
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { QrCode, Store } from "lucide-react";
+import { QrCode, Store, X } from "lucide-react";
 import { publicApi } from "../../lib/api";
 import { ApiError, errorMessage } from "../../lib/errors";
 import { buildTheme } from "../../lib/theme";
@@ -14,7 +14,9 @@ import { ErrorView } from "../../components/ErrorView";
 import { MenuSkeleton } from "../../components/Skeletons";
 import { CartDrawer } from "./CartDrawer";
 import { TableStatePanel } from "./TableStatePanel";
-import { BottomNav } from "./BottomNav";
+import { BottomNav, type CustomerView } from "./BottomNav";
+import { TopBar, TOP_BAR_HEIGHT } from "./TopBar";
+import { SideMenu } from "./SideMenu";
 import { useTableState } from "./useTableState";
 import { useCountdown } from "./useCountdown";
 
@@ -31,7 +33,9 @@ export function MenuPage() {
   const [load, setLoad] = useState<LoadState>({ kind: "loading" });
   const loadedAt = useRef(0);
   const [cartOpen, setCartOpen] = useState(false);
-  const [tableOpen, setTableOpen] = useState(false);
+  const [view, setView] = useState<CustomerView>("menu");
+  const [sideOpen, setSideOpen] = useState(false);
+  const [query, setQuery] = useState("");
   const [followOpen, setFollowOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [callBusy, setCallBusy] = useState(false);
@@ -132,19 +136,61 @@ export function MenuPage() {
           {fr.menu.suspended}
         </div>
       )}
+      <TopBar
+        cartCount={count}
+        showCart={cafe.ordering_enabled}
+        onOpenMenu={() => setSideOpen(true)}
+        onOpenCart={() => setCartOpen(true)}
+      />
+
       <div className="pb-32">
-        <MenuView
-          menu={menu}
-          onAdd={cafe.ordering_enabled ? onAdd : undefined}
-          cartQty={cartQty}
-          footer={
-            <div className="px-4 pb-6 pt-10 text-center">
-              <button type="button" onClick={() => setFollowOpen(true)} className="min-h-[44px] text-sm font-semibold text-ink underline underline-offset-4">
-                {fr.menu.followCta}
-              </button>
+        {view === "table" ? (
+          <section className="mx-auto w-full max-w-2xl px-4" style={{ paddingTop: `calc(${TOP_BAR_HEIGHT + 16}px + env(safe-area-inset-top, 0px))` }}>
+            <h1 className="text-2xl font-bold">{fr.table.title}</h1>
+            <div className="mt-4">
+              <TableStatePanel
+                inline
+                open
+                onClose={() => setView("menu")}
+                token={token}
+                state={table.state}
+                currency={cafe.currency}
+                refresh={table.refresh}
+                applyServerTotal={table.applyServerTotal}
+              />
             </div>
-          }
-        />
+          </section>
+        ) : (
+          <MenuView
+            menu={menu}
+            onAdd={cafe.ordering_enabled ? onAdd : undefined}
+            cartQty={cartQty}
+            externalQuery={query}
+            stickyOffset={TOP_BAR_HEIGHT}
+            belowHeader={
+              query.trim() ? (
+                <div className="px-4 pb-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setQuery("")}
+                    aria-label={fr.menu.clearSearch}
+                    className="inline-flex min-h-[40px] max-w-full items-center gap-2 rounded-full border border-line bg-surface px-4 text-sm font-semibold"
+                  >
+                    <span className="truncate">{fr.menu.searchActive(query.trim())}</span>
+                    <X className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  </button>
+                </div>
+              ) : undefined
+            }
+            footer={
+              <div className="px-4 pb-6 pt-10 text-center">
+                <button type="button" onClick={() => setFollowOpen(true)} className="min-h-[44px] text-sm font-semibold text-ink underline underline-offset-4">
+                  {fr.menu.followCta}
+                </button>
+              </div>
+            }
+          />
+        )}
       </div>
 
       {toast && (
@@ -154,17 +200,36 @@ export function MenuPage() {
       )}
 
       <BottomNav
-        cartCount={count}
-        showCart={cafe.ordering_enabled}
+        view={view}
         tableActive={tableActive}
         showCall={cafe.call_waiter_enabled}
         waiterComing={waiterOpen || callOptimistic}
         callCooldown={callCooldown}
         callBusy={callBusy}
-        onMenu={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-        onCart={() => setCartOpen(true)}
-        onTable={() => { setTableOpen(true); void table.refresh(); }}
+        onMenu={() => {
+          setView("menu");
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }}
+        onTable={() => {
+          setView("table");
+          window.scrollTo({ top: 0 });
+          void table.refresh();
+        }}
         onCall={callWaiter}
+      />
+
+      <SideMenu
+        open={sideOpen}
+        onClose={() => setSideOpen(false)}
+        query={query}
+        onQueryChange={(q) => {
+          setQuery(q);
+          if (view !== "menu") setView("menu");
+        }}
+        onFollow={() => {
+          setSideOpen(false);
+          setFollowOpen(true);
+        }}
       />
 
       {cafe.ordering_enabled && (
@@ -177,19 +242,9 @@ export function MenuPage() {
             if (res) table.applyServerTotal(res.session_total_cents);
             void table.refresh();
           }}
-          onShowTable={() => setTableOpen(true)}
+          onShowTable={() => { setView("table"); window.scrollTo({ top: 0 }); }}
         />
       )}
-
-      <TableStatePanel
-        open={tableOpen}
-        onClose={() => setTableOpen(false)}
-        token={token}
-        state={table.state}
-        currency={cafe.currency}
-        refresh={table.refresh}
-        applyServerTotal={table.applyServerTotal}
-      />
 
       {followOpen && (
         <Suspense fallback={null}>
