@@ -6,7 +6,7 @@ Backend uniquement (SQL, Edge Functions TypeScript/Deno, scripts Node). Aucun fr
 
 ```
 supabase/
-  config.toml  000                   verify_jwt par fonction
+  config.toml  000                   verify_jwt par fonction mmmmmmmmmmmmmmm
   migrations/0001_schema.sql      enums, tables, index, triggers
   migrations/0002_rls.sql         fonctions d'aide, privilèges, RLS, policies
   migrations/0003_functions.sql   RPC personnel/clients, fonctions internes, droits
