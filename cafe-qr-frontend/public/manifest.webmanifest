@@ -1,9 +1,0 @@
-{
-  "name": "Café QR",
-  "short_name": "Café QR",
-  "start_url": "/staff",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#1f1f1f",
-  "icons": []
-}
