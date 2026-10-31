@@ -17,7 +17,7 @@ supabase/
 scripts/create-cafe.mjs, scripts/generate-qr.mjs
 docs/API.md, docs/ASSUMPTIONS.md, docs/TESTS-MANUELS.md
 ```
-
+xc
 ## Prérequis
 - Supabase CLI récent (`supabase --version`), Docker pour la stack locale
 - Node.js ≥ 20.6 (scripts), `jq` et `psql` pour les tests manuels
