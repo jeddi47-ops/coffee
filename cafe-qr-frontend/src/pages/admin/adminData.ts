@@ -41,13 +41,18 @@ export async function loadCatalog(): Promise<{ categories: CategoryRow[]; produc
     supabase.from("categories").select("id, cafe_id, name, position, is_visible").order("position").order("name"),
     supabase
       .from("products")
-      .select("id, cafe_id, category_id, name, description, price_cents, image_path, is_available, is_promoted, promo_label, position")
+      .select("id, cafe_id, category_id, name, description, price_cents, image_path, extra_image_paths, is_available, is_promoted, promo_label, position")
       .order("position")
       .order("name"),
   ]);
   if (cats.error) throw fromPostgrest(cats.error);
   if (prods.error) throw fromPostgrest(prods.error);
   return { categories: (cats.data ?? []) as CategoryRow[], products: (prods.data ?? []) as ProductRow[] };
+}
+
+/** Photos d'un produit dans l'ordre : photo principale, puis les supplémentaires. */
+export function productPhotoUrls(p: Pick<ProductRow, "image_path" | "extra_image_paths">): string[] {
+  return [p.image_path, ...(p.extra_image_paths ?? [])].map((path) => publicAssetUrl(path)).filter((u): u is string => Boolean(u));
 }
 
 /** Menu tel que le client le reçoit de get-menu (catégories visibles uniquement), pour l'aperçu. */
@@ -86,7 +91,8 @@ export function buildPreviewMenu(
             name: p.name,
             description: p.description,
             price_cents: p.price_cents,
-            image_url: publicAssetUrl(p.image_path),
+            image_url: productPhotoUrls(p)[0] ?? null,
+            image_urls: productPhotoUrls(p),
             is_available: p.is_available,
             is_promoted: p.is_promoted,
             promo_label: p.promo_label,
