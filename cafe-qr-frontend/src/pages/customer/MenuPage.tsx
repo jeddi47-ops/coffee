@@ -1,7 +1,7 @@
 // /m/:token : page d'entrée du QR (menu, panier, suivi de table, appel serveur).
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
-import { QrCode, Store, X } from "lucide-react";
+import { QrCode, Store } from "lucide-react";
 import { publicApi } from "../../lib/api";
 import { ApiError, errorMessage } from "../../lib/errors";
 import { buildTheme } from "../../lib/theme";
@@ -35,7 +35,6 @@ export function MenuPage() {
   const [cartOpen, setCartOpen] = useState(false);
   const [view, setView] = useState<CustomerView>("menu");
   const [sideOpen, setSideOpen] = useState(false);
-  const [query, setQuery] = useState("");
   const [followOpen, setFollowOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [callBusy, setCallBusy] = useState(false);
@@ -165,23 +164,7 @@ export function MenuPage() {
             menu={menu}
             onAdd={cafe.ordering_enabled ? onAdd : undefined}
             cartQty={cartQty}
-            externalQuery={query}
             stickyOffset={TOP_BAR_HEIGHT}
-            belowHeader={
-              query.trim() ? (
-                <div className="px-4 pb-2 pt-1">
-                  <button
-                    type="button"
-                    onClick={() => setQuery("")}
-                    aria-label={fr.menu.clearSearch}
-                    className="inline-flex min-h-[40px] max-w-full items-center gap-2 rounded-full border border-line bg-surface px-4 text-sm font-semibold"
-                  >
-                    <span className="truncate">{fr.menu.searchActive(query.trim())}</span>
-                    <X className="h-4 w-4 shrink-0" aria-hidden="true" />
-                  </button>
-                </div>
-              ) : undefined
-            }
             footer={
               <div className="px-4 pb-6 pt-10 text-center">
                 <button type="button" onClick={() => setFollowOpen(true)} className="min-h-[44px] text-sm font-semibold text-ink underline underline-offset-4">
@@ -221,11 +204,6 @@ export function MenuPage() {
       <SideMenu
         open={sideOpen}
         onClose={() => setSideOpen(false)}
-        query={query}
-        onQueryChange={(q) => {
-          setQuery(q);
-          if (view !== "menu") setView("menu");
-        }}
         onFollow={() => {
           setSideOpen(false);
           setFollowOpen(true);
