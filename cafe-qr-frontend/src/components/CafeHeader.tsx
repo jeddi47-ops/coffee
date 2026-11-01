@@ -23,7 +23,7 @@ export function CafeHeader({
   const cleanTagline = tagline?.trim();
 
   return (
-    <header className="px-4 pb-4 pt-6 text-center">
+    <header className="px-4 pb-2 text-center" style={{ paddingTop: "calc(0.75rem + env(safe-area-inset-top, 0px))" }}>
       {showLogo ? (
         <img
           src={logoUrl as string}
@@ -44,7 +44,7 @@ export function CafeHeader({
       <h1 className="mt-3 text-2xl font-bold tracking-tight">{name}</h1>
       {cleanTagline && <p className="mx-auto mt-1 max-w-sm text-sm text-muted">{cleanTagline}</p>}
       {tableLabel && (
-        <p className="mt-3 inline-flex items-center rounded-full border border-line bg-surface px-3 py-1 text-xs font-semibold uppercase tracking-wider text-muted">
+        <p className="mt-2 inline-flex items-center rounded-full border border-line bg-surface px-3 py-1 text-xs font-semibold uppercase tracking-wider text-muted">
           {tableLabel}
         </p>
       )}
