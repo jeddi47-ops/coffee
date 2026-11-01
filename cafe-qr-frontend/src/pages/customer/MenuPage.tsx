@@ -107,10 +107,10 @@ export function MenuPage() {
   const count = totalQuantity(lines);
   const tableActive = Boolean(table.state?.orders.some((o) => o.status !== "served" && o.status !== "cancelled"));
 
-  const onAdd = (p: MenuProduct) => {
+  const onAdd = (p: MenuProduct, quantity = 1) => {
     if (!p.is_available || !cafe.ordering_enabled) return;
-    const res = addToCart(token, { productId: p.id, name: p.name, priceCents: p.price_cents });
-    setToast(res === "ok" ? fr.menu.addedToast(p.name) : res === "line_max" ? fr.cart.limit20 : fr.cart.limit50);
+    const res = addToCart(token, { productId: p.id, name: p.name, priceCents: p.price_cents }, quantity);
+    setToast(res === "ok" ? fr.menu.addedToast(p.name, quantity) : res === "line_max" ? fr.cart.limit20 : fr.cart.limit50);
   };
 
   const callWaiter = async () => {
