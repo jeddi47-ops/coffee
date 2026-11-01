@@ -37,13 +37,20 @@ export function QuantityStepper({
   onChange,
   name,
   className,
+  compact = false,
 }: {
   value: number;
   onChange: (n: number) => void;
   name: string;
   className?: string;
+  /** Version étroite pour la grille à 3 colonnes. */
+  compact?: boolean;
 }) {
-  const btn = "flex h-11 w-11 items-center justify-center rounded-full text-ink active:bg-line disabled:opacity-35";
+  const btn = cn(
+    "flex shrink-0 items-center justify-center rounded-full text-ink active:bg-line disabled:opacity-35",
+    compact ? "h-9 w-8" : "h-11 w-11",
+  );
+  const icon = compact ? "h-4 w-4" : "h-5 w-5";
   return (
     <div
       role="group"
@@ -51,24 +58,27 @@ export function QuantityStepper({
       className={cn("flex w-full items-center justify-between rounded-full border border-line bg-surface-2", className)}
     >
       <button type="button" disabled={value <= 1} onClick={() => onChange(value - 1)} aria-label={fr.cart.decrease(name)} className={btn}>
-        <Minus className="h-5 w-5" aria-hidden="true" />
+        <Minus className={icon} aria-hidden="true" />
       </button>
-      <span aria-live="polite" className="min-w-[2ch] text-center text-base font-bold tabular-nums">{value}</span>
+      <span aria-live="polite" className={cn("min-w-0 flex-1 text-center font-bold tabular-nums", compact ? "text-sm" : "text-base")}>{value}</span>
       <button type="button" disabled={value >= MAX_PER_LINE} onClick={() => onChange(value + 1)} aria-label={fr.cart.increase(name)} className={btn}>
-        <Plus className="h-5 w-5" aria-hidden="true" />
+        <Plus className={icon} aria-hidden="true" />
       </button>
     </div>
   );
 }
 
 /** Bouton « Ajouter » pleine largeur, à la couleur du café. */
-export function AddToCartButton({ label, ariaLabel, onClick }: { label: string; ariaLabel: string; onClick: () => void }) {
+export function AddToCartButton({ label, ariaLabel, onClick, compact = false }: { label: string; ariaLabel: string; onClick: () => void; compact?: boolean }) {
   return (
     <button
       type="button"
       onClick={onClick}
       aria-label={ariaLabel}
-      className="flex min-h-[48px] w-full items-center justify-center rounded-full bg-accent px-4 text-base font-bold text-accent-fg shadow-sm active:scale-[0.98]"
+      className={cn(
+        "flex w-full items-center justify-center rounded-full bg-accent font-bold text-accent-fg shadow-sm active:scale-[0.98]",
+        compact ? "min-h-[40px] px-2 text-sm" : "min-h-[48px] px-4 text-base",
+      )}
     >
       {label}
     </button>
@@ -132,24 +142,25 @@ export function ProductCard({
             className={cn("aspect-[4/3] w-full bg-surface-2 object-cover", unavailable && "grayscale")}
           />
         ) : (
-          <Initial name={product.name} className="aspect-[4/3] w-full text-4xl" />
+          <Initial name={product.name} className="aspect-[4/3] w-full text-3xl" />
         )}
-        {badge && <PromoBadge label={badge} className="absolute left-2 top-2 max-w-[calc(100%-1rem)] shadow-sm" />}
+        {badge && <PromoBadge label={badge} className="absolute left-1.5 top-1.5 max-w-[calc(100%-0.75rem)] !px-2 !py-0.5 !text-[10px] shadow-sm" />}
       </button>
 
-      <div className="flex flex-1 flex-col p-3">
+      <div className="flex flex-1 flex-col p-2">
         <button type="button" onClick={() => onOpen(product)} aria-label={fr.menu.openAria(product.name)} className="text-left">
-          <h3 className="line-clamp-2 font-semibold leading-snug">{product.name}</h3>
+          <h3 className="line-clamp-2 text-sm font-semibold leading-snug">{product.name}</h3>
         </button>
-        <p className="mt-1 text-lg font-bold">{formatMoney(product.price_cents, currency)}</p>
+        <p className="mt-0.5 text-base font-bold">{formatMoney(product.price_cents, currency)}</p>
 
-        <div className="mt-auto space-y-2 pt-3">
+        <div className="mt-auto space-y-1.5 pt-2">
           {unavailable ? (
-            <p className="py-2 text-center text-xs font-semibold uppercase tracking-wide text-muted">{fr.menu.unavailable}</p>
+            <p className="py-2 text-center text-[11px] font-semibold uppercase tracking-wide text-muted">{fr.menu.unavailable}</p>
           ) : onAdd ? (
             <>
-              <QuantityStepper value={qty} onChange={setQty} name={product.name} />
+              <QuantityStepper compact value={qty} onChange={setQty} name={product.name} />
               <AddToCartButton
+                compact
                 label={fr.menu.add}
                 ariaLabel={fr.menu.addAria(product.name)}
                 onClick={() => {
