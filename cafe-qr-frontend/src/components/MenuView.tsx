@@ -1,9 +1,10 @@
 // Rendu du menu, partagé par la zone client (/m/:token) et l'aperçu de l'admin.
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Search } from "lucide-react";
-import type { Menu, MenuProduct } from "../types/api";
+import type { Menu } from "../types/api";
 import { CafeHeader } from "./CafeHeader";
-import { FeaturedCarousel, ProductRow } from "./ProductCard";
+import { FeaturedCarousel, ProductCard, type AddHandler } from "./ProductCard";
+import { ProductSheet } from "./ProductSheet";
 import { fr } from "../i18n/fr";
 import { cn } from "../lib/utils";
 
@@ -21,7 +22,7 @@ export function MenuView({
   belowHeader,
 }: {
   menu: Menu;
-  onAdd?: (p: MenuProduct) => void;
+  onAdd?: AddHandler;
   cartQty?: Record<string, number>;
   showTable?: boolean;
   footer?: ReactNode;
@@ -32,6 +33,7 @@ export function MenuView({
 }) {
   const [query, setQuery] = useState("");
   const [active, setActive] = useState<string | null>(menu.categories[0]?.id ?? null);
+  const [openId, setOpenId] = useState<string | null>(null);
   const pillsRef = useRef<HTMLDivElement>(null);
   const currency = menu.cafe.currency;
   const q = normalize((externalQuery ?? query).trim());
@@ -51,6 +53,13 @@ export function MenuView({
     () => (q ? [] : menu.categories.flatMap((c) => c.products).filter((p) => p.is_promoted)),
     [menu.categories, q],
   );
+
+  // La fiche est retrouvée par id : elle reste à jour si le menu est rechargé pendant qu'elle est ouverte.
+  const openProduct = useMemo(
+    () => (openId ? menu.categories.flatMap((c) => c.products).find((p) => p.id === openId) ?? null : null),
+    [menu.categories, openId],
+  );
+  const closeSheet = useCallback(() => setOpenId(null), []);
 
   // La pastille active suit le défilement : dernière section dont le titre est passé sous la barre collante.
   useEffect(() => {
@@ -147,7 +156,7 @@ export function MenuView({
         <section aria-labelledby="featured-title" className="px-4 pt-2">
           <h2 id="featured-title" className="text-lg font-bold">{fr.menu.featured}</h2>
           <div className="mt-3">
-            <FeaturedCarousel products={featured} currency={currency} cartQty={cartQty} onAdd={onAdd} />
+            <FeaturedCarousel products={featured} currency={currency} cartQty={cartQty} onAdd={onAdd} onOpen={(p) => setOpenId(p.id)} />
           </div>
         </section>
       )}
@@ -158,17 +167,19 @@ export function MenuView({
       {categories.map((c) => (
         <section key={c.id} id={`cat-${c.id}`} aria-labelledby={`cat-title-${c.id}`} className="scroll-mt-[9rem] px-4 pt-5">
           <h2 id={`cat-title-${c.id}`} className="mb-3 text-lg font-bold">{c.name}</h2>
-          <div className="space-y-3">
+          <div className="grid grid-cols-2 items-stretch gap-3">
             {[...c.products]
               .sort((a, b) => a.position - b.position)
               .map((p) => (
-                <ProductRow key={p.id} product={p} currency={currency} qty={cartQty[p.id] ?? 0} onAdd={onAdd} />
+                <ProductCard key={p.id} product={p} currency={currency} onAdd={onAdd} onOpen={(x) => setOpenId(x.id)} />
               ))}
           </div>
         </section>
       ))}
 
       {footer}
+
+      {openProduct && <ProductSheet product={openProduct} currency={currency} onClose={closeSheet} onAdd={onAdd} />}
     </div>
   );
 }
