@@ -1,17 +1,13 @@
-// Carte produit. Doit rester propre sans photo : carte compacte avec l'initiale, jamais d'image cassée.
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Plus } from "lucide-react";
-import type { MenuProduct } from "../types/api";
-import { formatMoney } from "../lib/money";
-import { fr } from "../i18n/fr";
-import { cn } from "../lib/utils";
 
-function useImage(url: string | null) {
+/** `quantity` = nombre d'unités choisies avant de toucher « Ajouter ». */
+export type AddHandler = (p: MenuProduct, quantity: number) => void;
+
+export function useImage(url: string | null) {
   const [failed, setFailed] = useState(false);
   return { src: url && !failed ? url : null, onError: () => setFailed(true) };
 }
 
-function Initial({ name, className }: { name: string; className?: string }) {
+export function Initial({ name, className }: { name: string; className?: string }) {
   return (
     <div aria-hidden="true" className={cn("flex shrink-0 items-center justify-center bg-surface-2 font-bold text-muted", className)}>
       {name.trim().charAt(0).toUpperCase() || "?"}
@@ -19,7 +15,60 @@ function Initial({ name, className }: { name: string; className?: string }) {
   );
 }
 
-function AddButton({ product, qty, onAdd }: { product: MenuProduct; qty: number; onAdd?: (p: MenuProduct) => void }) {
+export function PromoBadge({ label, className }: { label: string; className?: string }) {
+  return (
+    <span className={cn("inline-block max-w-full truncate rounded-full bg-accent px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-accent-fg", className)}>
+      {label}
+    </span>
+  );
+}
+
+/** Quantité « − 1 + » sur toute la largeur, boutons de 44 px minimum (pouce). */
+export function QuantityStepper({
+  value,
+  onChange,
+  name,
+  className,
+}: {
+  value: number;
+  onChange: (n: number) => void;
+  name: string;
+  className?: string;
+}) {
+  const btn = "flex h-11 w-11 items-center justify-center rounded-full text-ink active:bg-line disabled:opacity-35";
+  return (
+    <div
+      role="group"
+      aria-label={fr.cart.quantity}
+      className={cn("flex w-full items-center justify-between rounded-full border border-line bg-surface-2", className)}
+    >
+      <button type="button" disabled={value <= 1} onClick={() => onChange(value - 1)} aria-label={fr.cart.decrease(name)} className={btn}>
+        <Minus className="h-5 w-5" aria-hidden="true" />
+      </button>
+      <span aria-live="polite" className="min-w-[2ch] text-center text-base font-bold tabular-nums">{value}</span>
+      <button type="button" disabled={value >= MAX_PER_LINE} onClick={() => onChange(value + 1)} aria-label={fr.cart.increase(name)} className={btn}>
+        <Plus className="h-5 w-5" aria-hidden="true" />
+      </button>
+    </div>
+  );
+}
+
+/** Bouton « Ajouter » pleine largeur, à la couleur du café. */
+export function AddToCartButton({ label, ariaLabel, onClick }: { label: string; ariaLabel: string; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={ariaLabel}
+      className="flex min-h-[48px] w-full items-center justify-center rounded-full bg-accent px-4 text-base font-bold text-accent-fg shadow-sm active:scale-[0.98]"
+    >
+      {label}
+    </button>
+  );
+}
+
+/** Petit bouton « + » : ajout rapide d'une unité (carrousel « À la une »). */
+function QuickAddButton({ product, qty, onAdd }: { product: MenuProduct; qty: number; onAdd?: AddHandler }) {
   if (!product.is_available) {
     return <span className="text-xs font-semibold uppercase tracking-wide text-muted">{fr.menu.unavailable}</span>;
   }
@@ -27,7 +76,7 @@ function AddButton({ product, qty, onAdd }: { product: MenuProduct; qty: number;
   return (
     <button
       type="button"
-      onClick={() => onAdd(product)}
+      onClick={() => onAdd(product, 1)}
       aria-label={fr.menu.addAria(product.name)}
       className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent text-accent-fg shadow-sm active:scale-95"
     >
@@ -41,56 +90,69 @@ function AddButton({ product, qty, onAdd }: { product: MenuProduct; qty: number;
   );
 }
 
-function PromoBadge({ label, className }: { label: string; className?: string }) {
-  return (
-    <span className={cn("inline-block max-w-full truncate rounded-full bg-accent px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-accent-fg", className)}>
-      {label}
-    </span>
-  );
-}
-
-/** Ligne de catégorie : texte à gauche, photo 4:3 à droite (ou initiale compacte à gauche). */
-export function ProductRow({
+/**
+ * Carte de la grille (2 colonnes) : photo + badge, nom sur 2 lignes max, prix, quantité, « Ajouter ».
+ * La description complète est dans la fiche (ProductSheet), ouverte en touchant la photo ou le nom.
+ */
+export function ProductCard({
   product,
   currency,
-  qty = 0,
   onAdd,
+  onOpen,
 }: {
   product: MenuProduct;
   currency: string;
-  qty?: number;
-  onAdd?: (p: MenuProduct) => void;
+  onAdd?: AddHandler;
+  onOpen: (p: MenuProduct) => void;
 }) {
   const img = useImage(product.image_url);
-  const promo = product.is_promoted && product.promo_label ? product.promo_label : null;
+  const [qty, setQty] = useState(1);
+  const unavailable = !product.is_available;
+  const badge = product.is_promoted ? product.promo_label || fr.menu.offer : null;
 
   return (
-    <article className={cn("flex gap-3 rounded-card border border-line bg-surface p-3", !product.is_available && "opacity-60")}>
-      {!img.src && <Initial name={product.name} className="h-12 w-12 rounded-card text-lg" />}
-      <div className="flex min-w-0 flex-1 flex-col">
-        {promo && <PromoBadge label={promo} className="mb-1.5 self-start" />}
-        <h3 className="font-semibold leading-snug">{product.name}</h3>
-        {product.description && <p className="mt-0.5 line-clamp-2 text-sm text-muted">{product.description}</p>}
-        <div className="mt-auto flex items-center justify-between gap-2 pt-2">
-          <span className="font-bold">{formatMoney(product.price_cents, currency)}</span>
-          {!img.src && <AddButton product={product} qty={qty} onAdd={onAdd} />}
-        </div>
-      </div>
-      {img.src && (
-        <div className="relative w-28 shrink-0 self-start">
+    <article className={cn("flex min-w-0 flex-col overflow-hidden rounded-card border border-line bg-surface", unavailable && "opacity-60")}>
+      {/* Le nom ci-dessous est le point d'accès clavier / lecteur d'écran ; la photo double juste le geste tactile. */}
+      <button type="button" onClick={() => onOpen(product)} tabIndex={-1} aria-hidden="true" className="relative block w-full text-left">
+        {img.src ? (
           <img
             src={img.src}
             onError={img.onError}
             alt=""
             loading="lazy"
             decoding="async"
-            className={cn("aspect-[4/3] w-full rounded-card bg-surface-2 object-cover", !product.is_available && "grayscale")}
+            className={cn("aspect-[4/3] w-full bg-surface-2 object-cover", unavailable && "grayscale")}
           />
-          <div className="mt-2 flex justify-end">
-            <AddButton product={product} qty={qty} onAdd={onAdd} />
-          </div>
+        ) : (
+          <Initial name={product.name} className="aspect-[4/3] w-full text-4xl" />
+        )}
+        {badge && <PromoBadge label={badge} className="absolute left-2 top-2 max-w-[calc(100%-1rem)] shadow-sm" />}
+      </button>
+
+      <div className="flex flex-1 flex-col p-3">
+        <button type="button" onClick={() => onOpen(product)} aria-label={fr.menu.openAria(product.name)} className="text-left">
+          <h3 className="line-clamp-2 font-semibold leading-snug">{product.name}</h3>
+        </button>
+        <p className="mt-1 text-lg font-bold">{formatMoney(product.price_cents, currency)}</p>
+
+        <div className="mt-auto space-y-2 pt-3">
+          {unavailable ? (
+            <p className="py-2 text-center text-xs font-semibold uppercase tracking-wide text-muted">{fr.menu.unavailable}</p>
+          ) : onAdd ? (
+            <>
+              <QuantityStepper value={qty} onChange={setQty} name={product.name} />
+              <AddToCartButton
+                label={fr.menu.add}
+                ariaLabel={fr.menu.addAria(product.name)}
+                onClick={() => {
+                  onAdd(product, qty);
+                  setQty(1);
+                }}
+              />
+            </>
+          ) : null}
         </div>
-      )}
+      </div>
     </article>
   );
 }
@@ -103,14 +165,16 @@ function FeaturedSlide({
   currency,
   qty,
   onAdd,
+  onOpen,
 }: {
   product: MenuProduct;
   currency: string;
   qty: number;
-  onAdd?: (p: MenuProduct) => void;
+  onAdd?: AddHandler;
+  onOpen: (p: MenuProduct) => void;
 }) {
   const img = useImage(product.image_url);
-  const promo = product.promo_label || fr.menu.featured;
+  const promo = product.promo_label || fr.menu.offer;
 
   return (
     <article
@@ -118,25 +182,28 @@ function FeaturedSlide({
     >
       {img.src && (
         <div className="relative">
-          <img
-            src={img.src}
-            onError={img.onError}
-            alt=""
-            loading="lazy"
-            decoding="async"
-            className={cn("aspect-[16/9] w-full bg-surface-2 object-cover", !product.is_available && "grayscale")}
-          />
-          <PromoBadge label={promo} className="absolute left-3 top-3 shadow-sm" />
+          <button type="button" onClick={() => onOpen(product)} tabIndex={-1} aria-hidden="true" className="block w-full">
+            <img
+              src={img.src}
+              onError={img.onError}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              className={cn("aspect-[16/9] w-full bg-surface-2 object-cover", !product.is_available && "grayscale")}
+            />
+          </button>
+          <PromoBadge label={promo} className="pointer-events-none absolute left-3 top-3 shadow-sm" />
         </div>
       )}
       <div className={cn("flex items-end justify-between gap-3 p-4", !img.src && "bg-accent-soft")}>
         <div className="min-w-0">
           {!img.src && <PromoBadge label={promo} className="mb-2" />}
-          <h3 className="text-lg font-bold leading-snug">{product.name}</h3>
-          {product.description && <p className="mt-0.5 line-clamp-2 text-sm text-muted">{product.description}</p>}
-          <p className="mt-2 font-bold">{formatMoney(product.price_cents, currency)}</p>
+          <button type="button" onClick={() => onOpen(product)} aria-label={fr.menu.openAria(product.name)} className="text-left">
+            <h3 className="line-clamp-2 text-lg font-bold leading-snug">{product.name}</h3>
+          </button>
+          <p className="mt-1 font-bold">{formatMoney(product.price_cents, currency)}</p>
         </div>
-        <AddButton product={product} qty={qty} onAdd={onAdd} />
+        <QuickAddButton product={product} qty={qty} onAdd={onAdd} />
       </div>
     </article>
   );
@@ -148,11 +215,13 @@ export function FeaturedCarousel({
   currency,
   cartQty,
   onAdd,
+  onOpen,
 }: {
   products: MenuProduct[];
   currency: string;
   cartQty: Record<string, number>;
-  onAdd?: (p: MenuProduct) => void;
+  onAdd?: AddHandler;
+  onOpen: (p: MenuProduct) => void;
 }) {
   const scroller = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
@@ -188,7 +257,7 @@ export function FeaturedCarousel({
         className="no-scrollbar flex snap-x snap-mandatory items-start gap-3 overflow-x-auto overflow-y-hidden transition-[height] duration-200"
       >
         {products.map((p) => (
-          <FeaturedSlide key={p.id} product={p} currency={currency} qty={cartQty[p.id] ?? 0} onAdd={onAdd} />
+          <FeaturedSlide key={p.id} product={p} currency={currency} qty={cartQty[p.id] ?? 0} onAdd={onAdd} onOpen={onOpen} />
         ))}
       </div>
       {products.length > 1 && (
