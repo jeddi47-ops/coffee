@@ -20,7 +20,7 @@ interface CartState {
   noteByToken: Record<string, string>;
   /** Clés d'annulation des commandes passées depuis cet onglet (order_id -> cancel_key). */
   cancelKeys: Record<string, string>;
-  add: (token: string, line: Omit<CartLine, "quantity" | "note">) => "ok" | "line_max" | "total_max";
+  add: (token: string, line: Omit<CartLine, "quantity" | "note">, quantity?: number) => "ok" | "line_max" | "total_max";
   setQuantity: (token: string, productId: string, quantity: number) => void;
   setLineNote: (token: string, productId: string, note: string) => void;
   remove: (token: string, productId: string) => void;
@@ -38,16 +38,22 @@ export const useCartStore = create<CartState>()(
       linesByToken: {},
       noteByToken: {},
       cancelKeys: {},
-      add: (token, line) => {
+      add: (token, line, quantity = 1) => {
         const lines = get().linesByToken[token] ?? [];
-        if (totalQuantity(lines) >= MAX_ITEMS) return "total_max";
         const existing = lines.find((l) => l.productId === line.productId);
-        if (existing && existing.quantity >= MAX_PER_LINE) return "line_max";
+        const wanted = Math.max(1, Math.floor(quantity));
+        const roomTotal = MAX_ITEMS - totalQuantity(lines);
+        const roomLine = MAX_PER_LINE - (existing?.quantity ?? 0);
+        if (roomTotal <= 0) return "total_max";
+        if (roomLine <= 0) return "line_max";
+        // Si la quantité demandée dépasse une limite, on ajoute ce qui rentre et on le signale.
+        const toAdd = Math.min(wanted, roomTotal, roomLine);
         const next = existing
-          ? lines.map((l) => (l.productId === line.productId ? { ...l, quantity: l.quantity + 1 } : l))
-          : [...lines, { ...line, quantity: 1, note: "" }];
+          ? lines.map((l) => (l.productId === line.productId ? { ...l, quantity: l.quantity + toAdd } : l))
+          : [...lines, { ...line, quantity: toAdd, note: "" }];
         set((s) => ({ linesByToken: { ...s.linesByToken, [token]: next } }));
-        return "ok";
+        if (toAdd === wanted) return "ok";
+        return toAdd === roomLine ? "line_max" : "total_max";
       },
       setQuantity: (token, productId, quantity) => {
         const lines = get().linesByToken[token] ?? [];
