@@ -167,7 +167,7 @@ export function MenuView({
       {categories.map((c) => (
         <section key={c.id} id={`cat-${c.id}`} aria-labelledby={`cat-title-${c.id}`} className="scroll-mt-[9rem] px-4 pt-5">
           <h2 id={`cat-title-${c.id}`} className="mb-3 text-lg font-bold">{c.name}</h2>
-          <div className="grid grid-cols-2 items-stretch gap-3">
+          <div className="grid grid-cols-3 items-stretch gap-2">
             {[...c.products]
               .sort((a, b) => a.position - b.position)
               .map((p) => (
