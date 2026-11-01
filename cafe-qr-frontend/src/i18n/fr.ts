@@ -91,6 +91,10 @@ export const fr = {
     loadError: "Impossible de charger le menu.",
     suspended: "Les commandes sont momentanément suspendues. Appelez un serveur.",
     followCta: "Recevoir les nouveautés du café",
+    searchActive: (q: string) => `Recherche : « ${q} »`,
+    clearSearch: "Effacer la recherche",
+    seeResults: "Voir les résultats",
+    featuredSlide: (i: number, n: number) => `Mise en avant ${i} sur ${n}`,
     addedToast: (name: string) => `${name} ajouté au panier`,
   },
   nav: {
@@ -104,6 +108,11 @@ export const fr = {
     callAria: "Appeler un serveur",
     waiterComing: "Arrive",
     waiterComingAria: "Un serveur arrive",
+    openMenu: "Ouvrir le menu",
+    closeMenu: "Fermer le menu",
+    sideTitle: "Menu",
+    account: "Se connecter",
+    accountAria: "Se connecter ou ouvrir mon compte",
   },
   cart: {
     title: "Mon panier",
