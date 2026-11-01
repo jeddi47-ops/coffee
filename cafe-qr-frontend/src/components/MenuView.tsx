@@ -1,10 +1,11 @@
 // Rendu du menu, partagé par la zone client (/m/:token) et l'aperçu de l'admin.
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { Search } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { Check, Search, SlidersHorizontal, X } from "lucide-react";
 import type { Menu } from "../types/api";
 import { CafeHeader } from "./CafeHeader";
 import { FeaturedCarousel, ProductCard, type AddHandler } from "./ProductCard";
 import { ProductSheet } from "./ProductSheet";
+import { Dialog } from "./ui/dialog";
 import { fr } from "../i18n/fr";
 import { cn } from "../lib/utils";
 
@@ -18,8 +19,6 @@ export function MenuView({
   showTable = true,
   footer,
   stickyOffset = 0,
-  externalQuery,
-  belowHeader,
 }: {
   menu: Menu;
   onAdd?: AddHandler;
@@ -27,16 +26,13 @@ export function MenuView({
   showTable?: boolean;
   footer?: ReactNode;
   stickyOffset?: number;
-  /** Si défini, la recherche est pilotée de l'extérieur (menu latéral) et le champ n'est pas affiché ici. */
-  externalQuery?: string;
-  belowHeader?: ReactNode;
 }) {
   const [query, setQuery] = useState("");
   const [active, setActive] = useState<string | null>(menu.categories[0]?.id ?? null);
   const [openId, setOpenId] = useState<string | null>(null);
-  const pillsRef = useRef<HTMLDivElement>(null);
+  const [catsOpen, setCatsOpen] = useState(false);
   const currency = menu.cafe.currency;
-  const q = normalize((externalQuery ?? query).trim());
+  const q = normalize(query.trim());
 
   const categories = useMemo(() => {
     const sorted = [...menu.categories].sort((a, b) => a.position - b.position);
@@ -85,16 +81,15 @@ export function MenuView({
     };
   }, [categories, stickyOffset]);
 
-  // La pastille active reste visible dans la barre horizontale.
-  useEffect(() => {
-    if (!active || !pillsRef.current) return;
-    const pill = pillsRef.current.querySelector<HTMLElement>(`[data-cat="${active}"]`);
-    pill?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-  }, [active]);
-
   const goTo = (id: string) => {
     setActive(id);
     document.getElementById(`cat-${id}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+  const closeCats = useCallback(() => setCatsOpen(false), []);
+  const pickCategory = (id: string) => {
+    setCatsOpen(false);
+    // On attend que la fenêtre soit fermée (elle bloque le défilement) avant de descendre à la section.
+    window.setTimeout(() => goTo(id), 60);
   };
 
   return (
@@ -106,12 +101,11 @@ export function MenuView({
         tableLabel={showTable ? fr.menu.tableLabel(menu.table.label) : undefined}
       />
 
-      {belowHeader}
-
-      {externalQuery === undefined && (
-        <div className="px-4">
+      {/* Barre collante : recherche + bouton « catégories », sous la barre du haut. */}
+      <div role="search" className="sticky z-20 mt-1 bg-bg px-4 py-2" style={{ top: `calc(${stickyOffset}px + env(safe-area-inset-top, 0px))` }}>
+        <div className="flex items-center gap-2">
           <label htmlFor="menu-search" className="sr-only">{fr.menu.searchLabel}</label>
-          <div className="flex min-h-[48px] items-center gap-2 rounded-full border border-line bg-surface px-4 focus-within:ring-2 focus-within:ring-accent">
+          <div className="flex min-h-[48px] min-w-0 flex-1 items-center gap-2 rounded-full border border-line bg-surface pl-4 pr-1 focus-within:ring-2 focus-within:ring-accent">
             <Search className="h-5 w-5 shrink-0 text-muted" aria-hidden="true" />
             <input
               id="menu-search"
@@ -119,38 +113,33 @@ export function MenuView({
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={fr.menu.searchPlaceholder}
-              className="min-h-[46px] w-full bg-transparent text-base text-ink placeholder:text-muted focus-visible:outline-none"
+              className="min-h-[46px] w-full min-w-0 bg-transparent text-base text-ink placeholder:text-muted focus-visible:outline-none [&::-webkit-search-cancel-button]:appearance-none"
               autoComplete="off"
             />
-          </div>
-        </div>
-      )}
-
-      {categories.length > 0 && (
-        <nav
-          aria-label={fr.menu.categoriesNav}
-          className="sticky z-20 mt-1 bg-bg py-2"
-          style={{ top: `calc(${stickyOffset}px + env(safe-area-inset-top, 0px))` }}
-        >
-          <div ref={pillsRef} className="no-scrollbar flex gap-2 overflow-x-auto px-4">
-            {categories.map((c) => (
+            {query && (
               <button
-                key={c.id}
                 type="button"
-                data-cat={c.id}
-                onClick={() => goTo(c.id)}
-                aria-current={active === c.id ? "true" : undefined}
-                className={cn(
-                  "min-h-[44px] shrink-0 rounded-full border px-4 text-sm font-semibold transition-colors",
-                  active === c.id ? "border-accent bg-accent text-accent-fg" : "border-line bg-surface text-ink",
-                )}
+                onClick={() => setQuery("")}
+                aria-label={fr.menu.clearSearch}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-muted active:bg-surface-2"
               >
-                {c.name}
+                <X className="h-5 w-5" aria-hidden="true" />
               </button>
-            ))}
+            )}
           </div>
-        </nav>
-      )}
+          {categories.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setCatsOpen(true)}
+              aria-label={fr.menu.filterAria}
+              aria-haspopup="dialog"
+              className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-line bg-surface text-ink active:bg-surface-2"
+            >
+              <SlidersHorizontal className="h-5 w-5" aria-hidden="true" />
+            </button>
+          )}
+        </div>
+      </div>
 
       {featured.length > 0 && (
         <section aria-labelledby="featured-title" className="px-4 pt-2">
@@ -165,7 +154,7 @@ export function MenuView({
       {q && categories.length === 0 && <p className="px-4 py-10 text-center text-muted">{fr.menu.noResults}</p>}
 
       {categories.map((c) => (
-        <section key={c.id} id={`cat-${c.id}`} aria-labelledby={`cat-title-${c.id}`} className="scroll-mt-[9rem] px-4 pt-5">
+        <section key={c.id} id={`cat-${c.id}`} aria-labelledby={`cat-title-${c.id}`} className="scroll-mt-[8rem] px-4 pt-5">
           <h2 id={`cat-title-${c.id}`} className="mb-3 text-lg font-bold">{c.name}</h2>
           <div className="grid grid-cols-3 items-stretch gap-2">
             {[...c.products]
@@ -178,6 +167,30 @@ export function MenuView({
       ))}
 
       {footer}
+
+      <Dialog open={catsOpen} onClose={closeCats} title={fr.menu.categoriesNav} side="bottom">
+        <ul className="space-y-1">
+          {categories.map((c) => (
+            <li key={c.id}>
+              <button
+                type="button"
+                onClick={() => pickCategory(c.id)}
+                aria-current={active === c.id ? "true" : undefined}
+                className={cn(
+                  "flex min-h-[48px] w-full items-center justify-between gap-3 rounded-card px-3 text-left text-base font-semibold active:bg-surface-2",
+                  active === c.id && "bg-accent-soft",
+                )}
+              >
+                <span className="min-w-0 truncate">{c.name}</span>
+                <span className="flex shrink-0 items-center gap-2 text-sm font-normal text-muted">
+                  {fr.menu.categoryCount(c.products.length)}
+                  {active === c.id && <Check className="h-4 w-4 text-ink" aria-hidden="true" />}
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </Dialog>
 
       {openProduct && <ProductSheet product={openProduct} currency={currency} onClose={closeSheet} onAdd={onAdd} />}
     </div>
