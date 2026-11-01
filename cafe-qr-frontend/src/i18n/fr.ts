@@ -88,6 +88,8 @@ export const fr = {
     empty: "Le menu n'est pas encore disponible.",
     tableLabel: (label: string) => `Table ${label}`,
     categoriesNav: "Catégories",
+    filterAria: "Choisir une catégorie",
+    categoryCount: (n: number) => `${n} ${plural(n, "produit", "produits")}`,
     invalidQrTitle: "QR code non valide",
     invalidQr: "Ce QR code n'est plus valide, demandez de l'aide au personnel.",
     inactiveTitle: "Café indisponible",
