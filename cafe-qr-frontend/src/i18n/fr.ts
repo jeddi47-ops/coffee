@@ -81,6 +81,10 @@ export const fr = {
     featured: "À la une",
     unavailable: "Indisponible",
     addAria: (name: string) => `Ajouter ${name} au panier`,
+    offer: "Offre du moment",
+    add: "Ajouter",
+    addWithPrice: (price: string) => `Ajouter · ${price}`,
+    openAria: (name: string) => `Voir la fiche de ${name}`,
     empty: "Le menu n'est pas encore disponible.",
     tableLabel: (label: string) => `Table ${label}`,
     categoriesNav: "Catégories",
@@ -95,7 +99,8 @@ export const fr = {
     clearSearch: "Effacer la recherche",
     seeResults: "Voir les résultats",
     featuredSlide: (i: number, n: number) => `Mise en avant ${i} sur ${n}`,
-    addedToast: (name: string) => `${name} ajouté au panier`,
+    addedToast: (name: string, quantity = 1) =>
+      quantity > 1 ? `${quantity} × ${name} ajoutés au panier` : `${name} ajouté au panier`,
   },
   nav: {
     label: "Navigation",
