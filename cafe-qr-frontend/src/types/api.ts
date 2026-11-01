@@ -11,6 +11,8 @@ export interface MenuProduct {
   description: string | null;
   price_cents: number;
   image_url: string | null;
+  /** Toutes les photos (la 1re = photo principale). Absent sur une ancienne réponse en cache. */
+  image_urls?: string[];
   is_available: boolean;
   is_promoted: boolean;
   promo_label: string | null;
@@ -158,6 +160,8 @@ export interface ProductRow {
   description: string | null;
   price_cents: number;
   image_path: string | null;
+  /** Photos supplémentaires (3 max), après la migration 0006. */
+  extra_image_paths?: string[] | null;
   is_available: boolean;
   is_promoted: boolean;
   promo_label: string | null;
