@@ -1,3 +1,11 @@
+// Cartes produit et carrousel « À la une ». Doit rester propre sans photo : bloc avec l'initiale, jamais d'image cassée.
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Minus, Plus } from "lucide-react";
+import type { MenuProduct } from "../types/api";
+import { formatMoney } from "../lib/money";
+import { fr } from "../i18n/fr";
+import { cn } from "../lib/utils";
+import { MAX_PER_LINE } from "../stores/cartStore";
 
 /** `quantity` = nombre d'unités choisies avant de toucher « Ajouter ». */
 export type AddHandler = (p: MenuProduct, quantity: number) => void;
