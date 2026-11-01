@@ -75,6 +75,8 @@ export const fr = {
     },
   },
   menu: {
+    photosLabel: (name: string) => `Photos de ${name}`,
+    photoCounter: (i: number, n: number) => `Photo ${i} sur ${n}`,
     searchLabel: "Rechercher dans le menu",
     searchPlaceholder: "Rechercher un produit…",
     noResults: "Aucun produit ne correspond à votre recherche.",
@@ -301,6 +303,11 @@ export const fr = {
     photoChoose: "Choisir une photo",
     photoRemove: "Retirer la photo",
     photoUploading: "Envoi de la photo…",
+    photosExtra: "Photos supplémentaires",
+    photosExtraHint: "Jusqu'à 3 photos en plus de la photo principale. Le client les fait défiler dans la fiche du produit.",
+    photoAdd: "Ajouter des photos",
+    photoRemoveOne: "Retirer cette photo",
+    photosMax: "3 photos supplémentaires au maximum.",
     photoErrors: {
       type: "Format non accepté : utilisez JPEG, PNG ou WebP.",
       decode: "Cette image n'a pas pu être lue.",
