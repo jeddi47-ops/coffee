@@ -20,7 +20,11 @@ Deno.serve(handle(async (req) => {
   menu.cafe.logo_url = publicAssetUrl(menu.cafe.logo_path);
   for (const category of menu.categories ?? []) {
     for (const product of category.products ?? []) {
-      product.image_url = publicAssetUrl(product.image_path);
+      const urls = [product.image_path, ...(product.extra_image_paths ?? [])]
+        .map((path: string | null) => publicAssetUrl(path))
+        .filter((url: string | null): url is string => Boolean(url));
+      product.image_urls = urls;
+      product.image_url = urls[0] ?? null; // les cartes utilisent la 1re photo
     }
   }
 
