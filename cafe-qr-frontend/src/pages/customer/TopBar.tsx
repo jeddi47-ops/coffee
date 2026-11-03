@@ -1,6 +1,7 @@
 // Barre du haut de la zone client : transparente en haut de page (elle laisse le logo respirer),
 // elle prend un fond léger dès que l'on défile pour que les icônes restent lisibles.
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import { Menu as MenuIcon, ShoppingBag, User } from "lucide-react";
 import { fr } from "../../i18n/fr";
@@ -19,6 +20,7 @@ export function TopBar({
   onOpenMenu: () => void;
   onOpenCart: () => void;
 }) {
+  const navigate = useNavigate();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -62,18 +64,15 @@ export function TopBar({
             </button>
           )}
           {/* Sous 440 px de large, l'icône seule laisse la place au logo centré. */}
-                   <button
+          <button
             type="button"
-            onClick={onOpenFollow}
-            aria-label={fr.nav.subscribeAria}
+            onClick={() => navigate("/compte")}
+            aria-label={fr.nav.accountAria}
             className="flex h-11 items-center justify-center gap-1.5 rounded-full border border-line bg-surface px-3 text-sm font-semibold text-ink"
           >
             <User className="h-5 w-5" aria-hidden="true" />
-            <span className="hidden min-[440px]:inline">{fr.nav.subscribe}</span>
-          </button>
-            <User className="h-5 w-5" aria-hidden="true" />
             <span className="hidden min-[440px]:inline">{fr.nav.account}</span>
-          </Link>
+          </button>
         </div>
       </div>
     </div>
