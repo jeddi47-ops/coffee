@@ -36,7 +36,7 @@ export default function LoginPage() {
 
   if (!ready) return <FullPageLoader />;
   if (profile?.kind === "staff") return <Navigate to={homeFor(profile.staff.role)} replace />;
-
+     if (profile?.kind === "customer") return <Navigate to="/compte" replace />;
   const login = async (e: FormEvent) => {
     e.preventDefault();
     setBusy(true);
@@ -48,9 +48,10 @@ export default function LoginPage() {
         return;
       }
       const p = await loadProfile();
-      if (p?.kind !== "staff") {
-        await signOut(null);
-        setError(p?.kind === "customer" ? fr.auth.notStaff : fr.auth.deactivated);
+          if (p?.kind === "customer") return; // la redirection vers /compte se fait au rendu
+     if (p?.kind !== "staff") {
+       await signOut(null);
+       setError(fr.auth.deactivated);
       }
     } catch {
       setError(fr.errors.network);
