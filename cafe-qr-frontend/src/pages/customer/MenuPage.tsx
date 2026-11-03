@@ -140,6 +140,7 @@ export function MenuPage() {
         showCart={cafe.ordering_enabled}
         onOpenMenu={() => setSideOpen(true)}
         onOpenCart={() => setCartOpen(true)}
+        onOpenFollow={() => setFollowOpen(true)}
       />
 
       <div className="pb-32">
