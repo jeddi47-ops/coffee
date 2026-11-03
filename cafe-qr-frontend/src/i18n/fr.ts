@@ -122,6 +122,8 @@ export const fr = {
     sideTitle: "Menu",
     account: "Se connecter",
     accountAria: "Se connecter ou ouvrir mon compte",
+    subscribe: "S'abonner",
+    subscribeAria: "S'abonner aux nouveautés du café",
   },
   cart: {
     title: "Mon panier",
@@ -190,7 +192,7 @@ export const fr = {
     deleteStep2: "Je confirme la suppression définitive",
     deleted: "Votre compte a été supprimé.",
     signInTitle: "Accéder à mon compte",
-    signInText: "Recevez un lien de connexion par email.",
+    signInText: "Recevez un lien de connexion par email. Pas encore abonné ? Choisissez « Recevoir les nouveautés du café » depuis le menu de votre table.",
     signInSubmit: "Recevoir le lien",
     linkSent: "Si un compte existe pour cet email, un lien de connexion vient d'être envoyé.",
   },
