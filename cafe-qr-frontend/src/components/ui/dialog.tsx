@@ -19,13 +19,15 @@ export function Dialog({
   side?: "center" | "bottom";
   className?: string;
 }) {
-  const panel = useRef<HTMLDivElement>(null);
+   const panel = useRef<HTMLDivElement>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   useEffect(() => {
     if (!open) return;
     const previous = document.activeElement as HTMLElement | null;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") onCloseRef.current();
     };
     document.addEventListener("keydown", onKey);
     const overflow = document.body.style.overflow;
@@ -36,7 +38,7 @@ export function Dialog({
       document.body.style.overflow = overflow;
       previous?.focus?.();
     };
-  }, [open, onClose]);
+  }, [open]);
 
   if (!open) return null;
   return (
