@@ -48,7 +48,7 @@ export function QuantityStepper({
 }) {
   const btn = cn(
     "flex shrink-0 items-center justify-center rounded-full text-ink active:bg-line disabled:opacity-35",
-    compact ? "h-9 w-8" : "h-11 w-11",
+    compact ? "h-10 w-10" : "h-11 w-11",
   );
   const icon = compact ? "h-4 w-4" : "h-5 w-5";
   return (
@@ -77,7 +77,7 @@ export function AddToCartButton({ label, ariaLabel, onClick, compact = false }: 
       aria-label={ariaLabel}
       className={cn(
         "flex w-full items-center justify-center rounded-full bg-accent font-bold text-accent-fg shadow-sm active:scale-[0.98]",
-        compact ? "min-h-[40px] px-2 text-sm" : "min-h-[48px] px-4 text-base",
+        compact ? "min-h-[44px] px-2 text-sm" : "min-h-[48px] px-4 text-base",
       )}
     >
       {label}
@@ -129,7 +129,7 @@ export function ProductCard({
   const badge = product.is_promoted ? product.promo_label || fr.menu.offer : null;
 
   return (
-    <article className={cn("flex min-w-0 flex-col overflow-hidden rounded-card border border-line bg-surface", unavailable && "opacity-60")}>
+    <article className={cn("flex h-full min-w-0 flex-col overflow-hidden rounded-card border border-line bg-surface", unavailable && "opacity-60")}>
       {/* Le nom ci-dessous est le point d'accès clavier / lecteur d'écran ; la photo double juste le geste tactile. */}
       <button type="button" onClick={() => onOpen(product)} tabIndex={-1} aria-hidden="true" className="relative block w-full text-left">
         {img.src ? (
