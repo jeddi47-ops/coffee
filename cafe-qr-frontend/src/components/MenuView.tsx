@@ -3,7 +3,8 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react
 import { Check, Search, SlidersHorizontal, X } from "lucide-react";
 import type { Menu } from "../types/api";
 import { CafeHeader } from "./CafeHeader";
-import { FeaturedCarousel, ProductCard, type AddHandler } from "./ProductCard";
+import { FeaturedCarousel, type AddHandler } from "./ProductCard";
+import { CategorySection } from "./CategorySection";
 import { ProductSheet } from "./ProductSheet";
 import { Dialog } from "./ui/dialog";
 import { fr } from "../i18n/fr";
@@ -154,16 +155,14 @@ export function MenuView({
       {q && categories.length === 0 && <p className="px-4 py-10 text-center text-muted">{fr.menu.noResults}</p>}
 
       {categories.map((c) => (
-        <section key={c.id} id={`cat-${c.id}`} aria-labelledby={`cat-title-${c.id}`} className="scroll-mt-[8rem] px-4 pt-5">
-          <h2 id={`cat-title-${c.id}`} className="mb-3 text-lg font-bold">{c.name}</h2>
-          <div className="grid grid-cols-3 items-stretch gap-2">
-            {[...c.products]
-              .sort((a, b) => a.position - b.position)
-              .map((p) => (
-                <ProductCard key={p.id} product={p} currency={currency} onAdd={onAdd} onOpen={(x) => setOpenId(x.id)} />
-              ))}
-          </div>
-        </section>
+        <CategorySection
+          key={c.id}
+          category={c}
+          currency={currency}
+          onAdd={onAdd}
+          onOpen={(p) => setOpenId(p.id)}
+          forceGrid={q.length > 0}
+        />
       ))}
 
       {footer}
