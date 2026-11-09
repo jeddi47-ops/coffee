@@ -45,10 +45,17 @@ export default function AuthCallbackPage() {
         navigate(homeFor(profile.staff.role), { replace: true });
         return;
       }
-      // Client déjà inscrit : les métadonnées d'inscription sont ignorées, on suit le café ici.
-      const pendingSlug = localStorage.getItem(PENDING_FOLLOW_KEY);
-      if (profile?.kind === "customer" && pendingSlug) {
-        await customerRpc.followCafe(pendingSlug).catch(() => undefined);
+      // Café à suivre : lu dans l'URL (marche même si le lien s'ouvre dans un autre navigateur),
+      // sinon dans localStorage. follow_cafe crée aussi la fiche client si elle manque.
+      const pendingSlug = new URLSearchParams(window.location.search).get("follow") ?? localStorage.getItem(PENDING_FOLLOW_KEY);
+      if (pendingSlug) {
+        try {
+          await customerRpc.followCafe(pendingSlug);
+          await loadProfile().catch(() => null);
+        } catch {
+          if (!cancelled) setFailed(true);
+          return;
+        }
       }
       localStorage.removeItem(PENDING_FOLLOW_KEY);
       navigate("/compte", { replace: true });
