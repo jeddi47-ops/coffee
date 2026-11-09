@@ -60,7 +60,7 @@ export default function FollowDialog({
       const { error: otpError } = await supabase.auth.signInWithOtp({
         email: email.trim(),
         options: {
-          emailRedirectTo: `${SITE_URL}/auth/callback`,
+          emailRedirectTo: `${SITE_URL}/auth/callback?follow=${encodeURIComponent(cafeSlug)}`,
           data: {
             signup_type: "customer",
             cafe_slug: cafeSlug,
