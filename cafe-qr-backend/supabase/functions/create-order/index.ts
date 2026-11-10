@@ -4,6 +4,7 @@
 import { fromDbError, handle, json, requireMethod } from "../_shared/errors.ts";
 import { adminClient } from "../_shared/supabase.ts";
 import { enforceIpLimit } from "../_shared/ratelimit.ts";
+import { notifyTableEvent, runInBackground } from "../_shared/push.ts";
 import { parseWith, readJsonBody, requireTableToken, z } from "../_shared/validate.ts";
 
 const optionValue = z.union([z.string().max(100), z.number(), z.boolean(), z.null()]);
@@ -47,6 +48,9 @@ Deno.serve(handle(async (req) => {
     p_order_type: body.order_type ?? "dine_in",
   });
   if (error) throw fromDbError(error);
+
+  // Alerte push du personnel (écran éteint, app en arrière-plan).
+  runInBackground(notifyTableEvent(token, "order", data?.order_number));
 
   return json(req, data, 201);
 }));

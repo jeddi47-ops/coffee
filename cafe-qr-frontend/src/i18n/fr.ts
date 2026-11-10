@@ -232,7 +232,7 @@ export const fr = {
   staff: {
     title: "Service",
     startTitle: "Prêt pour le service ?",
-    startText: "Le bouton active les sons et garde l'écran allumé.",
+    startText: "Le bouton active les sons et les alertes, et garde l'écran allumé.",
     start: "Démarrer le service",
     sound: "Son",
     night: "Mode nuit",
@@ -267,6 +267,13 @@ export const fr = {
     reconnected: "Connexion rétablie",
     adminLink: "Administration",
     loadError: "Impossible de charger le service.",
+    push: {
+      text: "Sans les alertes, rien ne sonne ni ne vibre quand l'écran est éteint.",
+      enable: "Activer les alertes",
+      needsInstall: "Sur iPhone : touchez Partager, puis « Sur l'écran d'accueil », et ouvrez l'app depuis son icône.",
+      denied: "Alertes bloquées. Autorisez les notifications pour cette app dans les réglages du téléphone.",
+      unsupported: "Ce téléphone ne gère pas les alertes quand l'écran est éteint.",
+    },
   },
   admin: {
     nav: {

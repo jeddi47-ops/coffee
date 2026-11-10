@@ -142,7 +142,10 @@ export async function reloadAll(): Promise<void> {
 
 function maybePlay(kind: "order" | "call") {
   const st = useStaffStore.getState();
-  if (!st.started || !st.soundOn) return;
+  if (!st.started) return;
+  // Vibration (Android) même si le son est coupé : le téléphone est souvent en poche.
+  navigator.vibrate?.(kind === "call" ? [500, 200, 500, 200, 500] : [300, 150, 300]);
+  if (!st.soundOn) return;
   if (kind === "order") playOrderSound();
   else playCallSound();
 }

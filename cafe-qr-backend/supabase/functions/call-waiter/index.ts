@@ -3,6 +3,7 @@
 import { fromDbError, handle, json, requireMethod } from "../_shared/errors.ts";
 import { adminClient } from "../_shared/supabase.ts";
 import { enforceIpLimit } from "../_shared/ratelimit.ts";
+import { notifyTableEvent, runInBackground } from "../_shared/push.ts";
 import { parseWith, readJsonBody, requireTableToken, z } from "../_shared/validate.ts";
 
 const schema = z.object({ token: z.string().max(100) });
@@ -16,6 +17,9 @@ Deno.serve(handle(async (req) => {
 
   const { data, error } = await adminClient().rpc("call_waiter_tx", { p_table_token: token });
   if (error) throw fromDbError(error);
+
+  // Alerte push uniquement pour un nouvel appel (pas pour un appel déjà ouvert).
+  if (data?.created) runInBackground(notifyTableEvent(token, "call"));
 
   return json(req, data, data?.created ? 201 : 200);
 }));

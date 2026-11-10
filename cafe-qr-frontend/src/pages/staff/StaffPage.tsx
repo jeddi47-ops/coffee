@@ -8,6 +8,7 @@ import { staffRpc } from "../../lib/api";
 import { ApiError, errorMessage } from "../../lib/errors";
 import { unlockAudio } from "../../lib/sound";
 import { enableWakeLock, disableWakeLock } from "../../lib/wakelock";
+import { enablePush, ensurePushRegistered, getPushState, type PushState } from "../../lib/webpush";
 import { fr } from "../../i18n/fr";
 import { cn } from "../../lib/utils";
 import { Button } from "../../components/ui/button";
@@ -15,6 +16,7 @@ import { ConnectionBanner } from "../../components/ConnectionBanner";
 import { ListSkeleton } from "../../components/Skeletons";
 import type { OrderStatus, ProductRow, StaffOrder, TableSessionRow, WaiterCallRow } from "../../types/api";
 import { OrderCard } from "./OrderCard";
+import { PushBanner } from "./PushBanner";
 import { CallsPanel } from "./CallsPanel";
 import { TablesView } from "./TablesView";
 import { AvailabilityList } from "./AvailabilityList";
@@ -31,6 +33,7 @@ export default function StaffPage() {
   const [now, setNow] = useState(Date.now());
   const [busyId, setBusyId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [pushState, setPushState] = useState<PushState>(() => getPushState());
 
   const staff = profile?.kind === "staff" ? profile : null;
   const cafeId = staff?.staff.cafe_id ?? "";
@@ -75,6 +78,11 @@ export default function StaffPage() {
     };
   }, []);
 
+  // Alertes push : remet l'abonnement du téléphone à jour si l'autorisation est déjà donnée.
+  useEffect(() => {
+    void ensurePushRegistered();
+  }, []);
+
   const orders = useMemo(
     () => Object.values(st.orders).sort((a, b) => a.created_at.localeCompare(b.created_at)),
     [st.orders],
@@ -90,10 +98,15 @@ export default function StaffPage() {
 
   if (!staff) return null;
 
+  const enableAlerts = () => enablePush().catch(() => getPushState());
+
   const start = async () => {
+    // D'abord : la demande d'autorisation doit partir directement du toucher.
+    const alerts = enableAlerts();
     await unlockAudio().catch(() => false);
     await enableWakeLock().catch(() => false);
     st.setStarted(true);
+    setPushState(await alerts);
   };
 
   const run = async (id: string, fn: () => Promise<void>) => {
@@ -185,6 +198,8 @@ export default function StaffPage() {
           ))}
         </nav>
       </header>
+
+      <PushBanner state={pushState} onEnable={() => void enableAlerts().then(setPushState)} />
 
       {message && (
         <div role="alert" className="sticky top-[120px] z-20 mx-3 mt-3 rounded-card bg-danger px-4 py-3 text-sm font-semibold text-danger-fg">
