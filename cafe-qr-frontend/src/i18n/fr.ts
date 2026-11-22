@@ -434,7 +434,7 @@ export const fr = {
     signIn: "Connectez-vous avec le compte administrateur de la plateforme.",
     refresh: "Actualiser",
     keyInventory: "Inventaire des clés",
-    grossRevenue: "Le revenu est calculé à l'activation : 10 $ par clé mensuelle et 110 $ par clé annuelle.",
+    grossRevenue: "Le revenu est calculé à l'activation : 10 $ par clé mensuelle et 110 $ par clé annuelle. Actualisation automatique toutes les 30 secondes.",
   },
   notFound: {
     title: "Page introuvable",
