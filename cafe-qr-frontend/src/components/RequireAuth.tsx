@@ -32,7 +32,10 @@ export function RequireStaff({ roles, children }: { roles: StaffRole[]; children
   if (!ready || (session && !profile)) return <FullPageLoader />;
   if (!session || noAccess) return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   if (profile?.kind === "customer") return <Navigate to="/compte" replace />;
-  if (profile?.kind === "staff" && profile.cafe.access_until && new Date(profile.cafe.access_until).getTime() <= Date.now() && location.pathname !== "/renouvellement") {\n    return <Navigate to="/renouvellement" replace />;\n  }\n  if (profile?.kind === "staff" && !roles.includes(profile.staff.role)) {
+  if (profile?.kind === "staff" && profile.cafe.access_until && new Date(profile.cafe.access_until).getTime() <= Date.now() && location.pathname !== "/renouvellement") {
+    return <Navigate to="/renouvellement" replace />;
+  }
+  if (profile?.kind === "staff" && !roles.includes(profile.staff.role)) {
     return <Navigate to={homeFor(profile.staff.role)} replace />;
   }
   return <>{children}</>;
