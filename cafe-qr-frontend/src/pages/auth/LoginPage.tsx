@@ -1,6 +1,6 @@
 // /login : connexion du personnel (email + mot de passe), mot de passe oublié.
 import { useEffect, useState, type FormEvent } from "react";
-import { Navigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { supabase } from "../../lib/supabase";
 import { SITE_URL } from "../../lib/env";
 import { homeFor, useAuthStore } from "../../stores/authStore";
@@ -88,6 +88,7 @@ export default function LoginPage() {
           {mode === "login" ? (busy ? fr.auth.submitting : fr.auth.submit) : fr.auth.forgotSubmit}
         </Button>
       </form>
+      {mode === "login" && <p className="mt-3 text-center text-sm">Nouveau café ? <Link className="underline" to="/inscription">Créer un espace avec une clé</Link></p>}
       <div className="mt-4 text-center">
         <Button variant="link" onClick={() => { setMode(mode === "login" ? "forgot" : "login"); setError(null); setInfo(null); }}>
           {mode === "login" ? fr.auth.forgot : fr.auth.backToLogin}
