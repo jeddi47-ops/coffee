@@ -50,7 +50,7 @@ Deno.serve(handle(async (req) => {
     p_cafe_name: body.cafe_name,
     p_slug: slugify(body.cafe_name),
     p_owner_name: body.owner_name,
-    p_code_hash: await sha256(body.access_key),
+    p_code_hash: codeHash,
   });
   if (rpcError) {
     await admin.auth.admin.deleteUser(data.user.id).catch((e) => console.error("rollback invitation", e));
