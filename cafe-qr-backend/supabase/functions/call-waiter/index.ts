@@ -1,7 +1,7 @@
 // POST /functions/v1/call-waiter   (public, verify_jwt = false)
 // Corps : { token } — idempotent si un appel est déjà ouvert ; 429 pendant le délai de répit.
 import { fromDbError, handle, json, requireMethod } from "../_shared/errors.ts";
-import { adminClient } from "../_shared/supabase.ts";
+import { adminClient, requireActiveCafeForTableToken } from "../_shared/supabase.ts";
 import { enforceIpLimit } from "../_shared/ratelimit.ts";
 import { notifyTableEvent, runInBackground } from "../_shared/push.ts";
 import { parseWith, readJsonBody, requireTableToken, z } from "../_shared/validate.ts";
@@ -14,6 +14,7 @@ Deno.serve(handle(async (req) => {
 
   const body = parseWith(schema, await readJsonBody(req, 1024));
   const token = requireTableToken(body.token);
+  await requireActiveCafeForTableToken(token);
 
   const { data, error } = await adminClient().rpc("call_waiter_tx", { p_table_token: token });
   if (error) throw fromDbError(error);

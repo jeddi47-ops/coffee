@@ -1,7 +1,7 @@
 // POST /functions/v1/cancel-order   (public, verify_jwt = false)
 // Corps : { token, order_id, cancel_key } — cancel_key est renvoyée une seule fois par create-order.
 import { fromDbError, handle, json, requireMethod } from "../_shared/errors.ts";
-import { adminClient } from "../_shared/supabase.ts";
+import { adminClient, requireActiveCafeForTableToken } from "../_shared/supabase.ts";
 import { enforceIpLimit } from "../_shared/ratelimit.ts";
 import { parseWith, readJsonBody, requireTableToken, z } from "../_shared/validate.ts";
 
@@ -17,6 +17,7 @@ Deno.serve(handle(async (req) => {
 
   const body = parseWith(schema, await readJsonBody(req, 2 * 1024));
   const token = requireTableToken(body.token);
+  await requireActiveCafeForTableToken(token);
 
   const { data, error } = await adminClient().rpc("cancel_order_tx", {
     p_table_token: token,

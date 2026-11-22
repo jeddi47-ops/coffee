@@ -1,6 +1,6 @@
 // GET /functions/v1/get-menu?token=<qr_token>   (public, verify_jwt = false)
 import { fromDbError, handle, json, requireMethod } from "../_shared/errors.ts";
-import { adminClient, publicAssetUrl } from "../_shared/supabase.ts";
+import { adminClient, publicAssetUrl, requireActiveCafeForTableToken } from "../_shared/supabase.ts";
 import { enforceIpLimit } from "../_shared/ratelimit.ts";
 import { requireTableToken } from "../_shared/validate.ts";
 
@@ -12,6 +12,7 @@ Deno.serve(handle(async (req) => {
   await enforceIpLimit(req, "get-menu", 60, 60);
 
   const token = requireTableToken(new URL(req.url).searchParams.get("token"));
+  await requireActiveCafeForTableToken(token);
 
   const { data, error } = await adminClient().rpc("get_menu_tx", { p_table_token: token });
   if (error) throw fromDbError(error);

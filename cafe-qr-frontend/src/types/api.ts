@@ -116,6 +116,8 @@ export interface CafeRow {
   logo_path: string | null;
   currency: string;
   is_active: boolean;
+  access_until?: string | null;
+  access_plan?: "monthly" | "annual" | null;
   ordering_enabled: boolean;
   call_waiter_enabled: boolean;
   order_rate_limit: number;

@@ -2,7 +2,7 @@
 // Corps : { token, items: [{ product_id, quantity, note?, options? }], note?, order_type? }
 // Les prix éventuellement envoyés par le client sont ignorés (clés inconnues supprimées).
 import { fromDbError, handle, json, requireMethod } from "../_shared/errors.ts";
-import { adminClient } from "../_shared/supabase.ts";
+import { adminClient, requireActiveCafeForTableToken } from "../_shared/supabase.ts";
 import { enforceIpLimit } from "../_shared/ratelimit.ts";
 import { notifyTableEvent, runInBackground } from "../_shared/push.ts";
 import { parseWith, readJsonBody, requireTableToken, z } from "../_shared/validate.ts";
@@ -28,6 +28,7 @@ Deno.serve(handle(async (req) => {
 
   const body = parseWith(schema, await readJsonBody(req, 32 * 1024));
   const token = requireTableToken(body.token);
+  await requireActiveCafeForTableToken(token);
 
   const totalQty = body.items.reduce((sum, i) => sum + i.quantity, 0);
   if (totalQty > 50) {

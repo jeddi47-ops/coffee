@@ -72,3 +72,15 @@ verify_jwt = true
 
 [functions.send-announcement]
 verify_jwt = true
+
+[functions.platform-dashboard]
+verify_jwt = true
+
+[functions.create-access-keys]
+verify_jwt = true
+
+[functions.register-cafe]
+verify_jwt = false
+
+[functions.renew-access-key]
+verify_jwt = true

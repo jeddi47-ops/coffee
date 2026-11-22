@@ -9,6 +9,8 @@ const DesabonnementPage = lazy(() => import("./pages/DesabonnementPage"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 const AccountPage = lazy(() => import("./pages/customer/AccountPage"));
 const LoginPage = lazy(() => import("./pages/auth/LoginPage"));
+const RegisterPage = lazy(() => import("./pages/auth/RegisterPage"));
+const RenewPage = lazy(() => import("./pages/auth/RenewPage"));
 const AuthCallbackPage = lazy(() => import("./pages/auth/AuthCallbackPage"));
 const SetPasswordPage = lazy(() => import("./pages/auth/SetPasswordPage"));
 const StaffPage = lazy(() => import("./pages/staff/StaffPage"));
@@ -18,12 +20,16 @@ const TablesAdminPage = lazy(() => import("./pages/admin/TablesAdminPage"));
 const StaffAdminPage = lazy(() => import("./pages/admin/StaffAdminPage"));
 const AnnouncementsPage = lazy(() => import("./pages/admin/AnnouncementsPage"));
 const SettingsPage = lazy(() => import("./pages/admin/SettingsPage"));
+const PlatformAdminPage = lazy(() => import("./pages/admin/PlatformAdminPage"));
 
 export const routes: RouteObject[] = [
   { path: "/m/:token", element: <MenuPage /> },
   { path: "/desabonnement", element: <DesabonnementPage /> },
   { path: "/compte", element: <AccountPage /> },
   { path: "/login", element: <LoginPage /> },
+  { path: "/inscription", element: <RegisterPage /> },
+  { path: "/renouvellement", element: <RenewPage /> },
+  { path: "/platform-admin", element: <PlatformAdminPage /> },
   { path: "/auth/callback", element: <AuthCallbackPage /> },
   { path: "/auth/mot-de-passe", element: <SetPasswordPage /> },
   {

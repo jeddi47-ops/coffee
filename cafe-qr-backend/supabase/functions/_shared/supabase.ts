@@ -43,7 +43,25 @@ export interface StaffContext {
  * Revérifie côté code (en plus de verify_jwt) : JWT valide, employé actif,
  * café actif, rôle autorisé.
  */
-export async function requireStaff(req: Request, roles: StaffRole[]): Promise<StaffContext> {
+export type PlatformAdminContext = { userId: string };
+
+export async function requirePlatformAdmin(req: Request): Promise<PlatformAdminContext> {
+  const header = req.headers.get("Authorization") ?? "";
+  const match = /^Bearer\s+(.+)$/i.exec(header);
+  if (!match) throw new HttpError(401, "unauthorized", "Jeton d'authentification manquant.");
+  const admin = adminClient();
+  const { data, error } = await admin.auth.getUser(match[1]);
+  if (error || !data?.user) throw new HttpError(401, "unauthorized", "Session invalide ou expirée.");
+  const { data: allowed, error: lookupError } = await admin
+    .from("platform_admins")
+    .select("user_id")
+    .eq("user_id", data.user.id)
+    .maybeSingle();
+  if (lookupError || !allowed) throw new HttpError(403, "platform_admin_required", "Accès réservé à l'administration de la plateforme.");
+  return { userId: data.user.id };
+}
+
+export async function requireStaff(req: Request, roles: StaffRole[], options: { allowExpired?: boolean } = {}): Promise<StaffContext> {
   const header = req.headers.get("Authorization") ?? "";
   const match = /^Bearer\s+(.+)$/i.exec(header);
   if (!match) throw new HttpError(401, "unauthorized", "Jeton d'authentification manquant.");
@@ -55,7 +73,7 @@ export async function requireStaff(req: Request, roles: StaffRole[]): Promise<St
 
   const { data: staff, error } = await adminClient()
     .from("staff_members")
-    .select("id, cafe_id, role, is_active, display_name, cafes!inner(is_active)")
+    .select("id, cafe_id, role, is_active, display_name, cafes!inner(is_active, access_until)")
     .eq("id", userData.user.id)
     .maybeSingle();
 
@@ -65,6 +83,9 @@ export async function requireStaff(req: Request, roles: StaffRole[]): Promise<St
   const cafe: any = Array.isArray(staff?.cafes) ? staff?.cafes[0] : staff?.cafes;
   if (!staff || !staff.is_active || !cafe?.is_active) {
     throw new HttpError(403, "forbidden", "Accès réservé au personnel actif d'un café actif.");
+  }
+  if (!options.allowExpired && cafe.access_until && new Date(cafe.access_until).getTime() <= Date.now()) {
+    throw new HttpError(403, "subscription_expired", "L’accès au café est expiré. Activez une nouvelle clé pour le renouveler.");
   }
   if (!roles.includes(staff.role as StaffRole)) {
     throw new HttpError(403, "forbidden_role", "Votre rôle ne permet pas cette action.");
@@ -76,4 +97,21 @@ export async function requireStaff(req: Request, roles: StaffRole[]): Promise<St
     role: staff.role as StaffRole,
     displayName: staff.display_name,
   };
+}
+
+/** Bloque les QR clients lorsque le café est désactivé ou son accès expiré. */
+export async function requireActiveCafeForTableToken(token: string): Promise<void> {
+  const { data, error } = await adminClient()
+    .from("cafe_tables")
+    .select("is_active, cafes!inner(is_active, access_until)")
+    .eq("qr_token", token)
+    .maybeSingle();
+  if (error) throw fromDbError(error);
+  if (!data || !data.is_active) throw new HttpError(404, "table_not_found", "QR code inconnu ou désactivé.");
+  // deno-lint-ignore no-explicit-any
+  const cafe: any = Array.isArray(data.cafes) ? data.cafes[0] : data.cafes;
+  if (!cafe?.is_active) throw new HttpError(403, "cafe_inactive", "Ce café n'est pas disponible.");
+  if (cafe.access_until && new Date(cafe.access_until).getTime() <= Date.now()) {
+    throw new HttpError(403, "subscription_expired", "L'accès à ce café a expiré.");
+  }
 }
