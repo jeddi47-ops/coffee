@@ -14,7 +14,7 @@ create table public.access_keys (
   created_at timestamptz not null default now(),
   created_by uuid not null references public.platform_admins(user_id),
   activated_at timestamptz,
-  redeemed_cafe_id uuid references public.cafes(id) on delete set null,
+  redeemed_cafe_id uuid references public.cafes(id) on delete restrict,
   constraint access_keys_activation_pair check (
     (activated_at is null and redeemed_cafe_id is null)
     or (activated_at is not null and redeemed_cafe_id is not null)
