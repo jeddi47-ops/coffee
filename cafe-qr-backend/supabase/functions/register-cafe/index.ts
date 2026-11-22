@@ -29,6 +29,15 @@ Deno.serve(handle(async (req) => {
   await enforceRateLimit(`register:${body.email}`, 3, 3600);
 
   const admin = adminClient();
+  const codeHash = await sha256(body.access_key);
+  const { data: validKey, error: keyError } = await admin
+    .from("access_keys")
+    .select("id")
+    .eq("code_hash", codeHash)
+    .is("activated_at", null)
+    .maybeSingle();
+  if (keyError) throw fromDbError(keyError);
+  if (!validKey) throw new HttpError(400, "invalid_or_used_key", "Cette clé est invalide ou déjà utilisée.");
   const siteUrl = (Deno.env.get("SITE_URL") ?? "").replace(/\/+$/, "");
   const { data, error } = await admin.auth.admin.inviteUserByEmail(body.email, {
     data: { signup_type: "staff", display_name: body.owner_name },
