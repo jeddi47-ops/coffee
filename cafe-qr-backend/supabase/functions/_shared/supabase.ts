@@ -95,3 +95,20 @@ export async function requireStaff(req: Request, roles: StaffRole[], options: { 
     displayName: staff.display_name,
   };
 }
+
+/** Bloque les QR clients lorsque le café est désactivé ou son accès expiré. */
+export async function requireActiveCafeForTableToken(token: string): Promise<void> {
+  const { data, error } = await adminClient()
+    .from("cafe_tables")
+    .select("is_active, cafes!inner(is_active, access_until)")
+    .eq("qr_token", token)
+    .maybeSingle();
+  if (error) throw fromDbError(error);
+  if (!data || !data.is_active) throw new HttpError(404, "table_not_found", "QR code inconnu ou désactivé.");
+  // deno-lint-ignore no-explicit-any
+  const cafe: any = Array.isArray(data.cafes) ? data.cafes[0] : data.cafes;
+  if (!cafe?.is_active) throw new HttpError(403, "cafe_inactive", "Ce café n'est pas disponible.");
+  if (cafe.access_until && new Date(cafe.access_until).getTime() <= Date.now()) {
+    throw new HttpError(403, "subscription_expired", "L'accès à ce café a expiré.");
+  }
+}
