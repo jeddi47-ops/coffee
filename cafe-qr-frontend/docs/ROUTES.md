@@ -23,6 +23,8 @@ un manager qui ouvre `/admin/equipe` ou `/admin/reglages` est renvoyé vers `/ad
 ligne `staff_members` : déconnexion avec message. Un employé qui ouvre `/compte` est renvoyé vers son espace.
 Un lien d'authentification arrivant sur n'importe quelle page est redirigé vers `/auth/callback` (fragment conservé).
 
+| `/platform-admin` | administrateur plateforme (contrôlé côté serveur) | Statistiques par mois et génération/export de lots de clés | `src/pages/admin/PlatformAdminPage.tsx` |
+
 ## Edge Functions (`<SUPABASE_URL>/functions/v1/…`)
 | Fonction | Méthode | Accès | Appelée par |
 |---|---|---|---|
