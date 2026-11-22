@@ -43,6 +43,24 @@ export interface StaffContext {
  * Revérifie côté code (en plus de verify_jwt) : JWT valide, employé actif,
  * café actif, rôle autorisé.
  */
+export type PlatformAdminContext = { userId: string };
+
+export async function requirePlatformAdmin(req: Request): Promise<PlatformAdminContext> {
+  const header = req.headers.get("Authorization") ?? "";
+  const match = /^Bearer\\s+(.+)$/i.exec(header);
+  if (!match) throw new HttpError(401, "unauthorized", "Jeton d'authentification manquant.");
+  const admin = adminClient();
+  const { data, error } = await admin.auth.getUser(match[1]);
+  if (error || !data?.user) throw new HttpError(401, "unauthorized", "Session invalide ou expirée.");
+  const { data: allowed, error: lookupError } = await admin
+    .from("platform_admins")
+    .select("user_id")
+    .eq("user_id", data.user.id)
+    .maybeSingle();
+  if (lookupError || !allowed) throw new HttpError(403, "platform_admin_required", "Accès réservé à l'administration de la plateforme.");
+  return { userId: data.user.id };
+}
+
 export async function requireStaff(req: Request, roles: StaffRole[]): Promise<StaffContext> {
   const header = req.headers.get("Authorization") ?? "";
   const match = /^Bearer\s+(.+)$/i.exec(header);
