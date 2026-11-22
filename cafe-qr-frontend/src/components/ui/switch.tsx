@@ -36,8 +36,8 @@ export function Switch({
       >
         <span
           className={cn(
-            "absolute top-0.5 h-5 w-5 rounded-full transition-transform",
-            checked ? "translate-x-6 bg-accent-fg" : "translate-x-1 bg-muted",
+            "absolute left-1 top-0.5 h-5 w-5 rounded-full transition-transform",
+            checked ? "translate-x-5 bg-accent-fg" : "translate-x-0 bg-muted",
           )}
         />
       </button>
