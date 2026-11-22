@@ -18,12 +18,14 @@ const TablesAdminPage = lazy(() => import("./pages/admin/TablesAdminPage"));
 const StaffAdminPage = lazy(() => import("./pages/admin/StaffAdminPage"));
 const AnnouncementsPage = lazy(() => import("./pages/admin/AnnouncementsPage"));
 const SettingsPage = lazy(() => import("./pages/admin/SettingsPage"));
+const PlatformAdminPage = lazy(() => import("./pages/admin/PlatformAdminPage"));
 
 export const routes: RouteObject[] = [
   { path: "/m/:token", element: <MenuPage /> },
   { path: "/desabonnement", element: <DesabonnementPage /> },
   { path: "/compte", element: <AccountPage /> },
   { path: "/login", element: <LoginPage /> },
+  { path: "/platform-admin", element: <PlatformAdminPage /> },
   { path: "/auth/callback", element: <AuthCallbackPage /> },
   { path: "/auth/mot-de-passe", element: <SetPasswordPage /> },
   {
