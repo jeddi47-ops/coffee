@@ -84,7 +84,10 @@ export async function requireStaff(req: Request, roles: StaffRole[], options: { 
   if (!staff || !staff.is_active || !cafe?.is_active) {
     throw new HttpError(403, "forbidden", "Accès réservé au personnel actif d'un café actif.");
   }
-  if (!options.allowExpired && cafe.access_until && new Date(cafe.access_until).getTime() <= Date.now()) {\n    throw new HttpError(403, "subscription_expired", "L’accès au café est expiré. Activez une nouvelle clé pour le renouveler.");\n  }\n  if (!roles.includes(staff.role as StaffRole)) {
+  if (!options.allowExpired && cafe.access_until && new Date(cafe.access_until).getTime() <= Date.now()) {
+    throw new HttpError(403, "subscription_expired", "L’accès au café est expiré. Activez une nouvelle clé pour le renouveler.");
+  }
+  if (!roles.includes(staff.role as StaffRole)) {
     throw new HttpError(403, "forbidden_role", "Votre rôle ne permet pas cette action.");
   }
 
