@@ -9,6 +9,7 @@ const DesabonnementPage = lazy(() => import("./pages/DesabonnementPage"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
 const AccountPage = lazy(() => import("./pages/customer/AccountPage"));
 const LoginPage = lazy(() => import("./pages/auth/LoginPage"));
+const RegisterPage = lazy(() => import("./pages/auth/RegisterPage"));
 const AuthCallbackPage = lazy(() => import("./pages/auth/AuthCallbackPage"));
 const SetPasswordPage = lazy(() => import("./pages/auth/SetPasswordPage"));
 const StaffPage = lazy(() => import("./pages/staff/StaffPage"));
@@ -25,6 +26,7 @@ export const routes: RouteObject[] = [
   { path: "/desabonnement", element: <DesabonnementPage /> },
   { path: "/compte", element: <AccountPage /> },
   { path: "/login", element: <LoginPage /> },
+  { path: "/inscription", element: <RegisterPage /> },
   { path: "/platform-admin", element: <PlatformAdminPage /> },
   { path: "/auth/callback", element: <AuthCallbackPage /> },
   { path: "/auth/mot-de-passe", element: <SetPasswordPage /> },
