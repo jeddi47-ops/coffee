@@ -65,6 +65,8 @@ supabase functions deploy call-waiter
 supabase functions deploy unsubscribe
 supabase functions deploy create-staff
 supabase functions deploy send-announcement
+supabase functions deploy platform-dashboard
+supabase functions deploy create-access-keys
 ```
 
 ### 6. Réglages Auth (Dashboard → Authentication)
