@@ -14,7 +14,7 @@ async function sha256(value: string): Promise<string> {
 Deno.serve(handle(async (req) => {
   requireMethod(req, ["POST"]);
   await enforceIpLimit(req, "renew-access-key", 10, 3600);
-  const staff = await requireStaff(req, ["owner"]);
+  const staff = await requireStaff(req, ["owner"], { allowExpired: true });
   await enforceRateLimit(`renew:${staff.userId}`, 8, 3600);
   const body = parseWith(schema, await readJsonBody(req, 1024));
   const { data, error } = await adminClient().rpc("renew_cafe_access_key", {
