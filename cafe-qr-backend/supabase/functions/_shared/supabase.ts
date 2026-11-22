@@ -61,7 +61,7 @@ export async function requirePlatformAdmin(req: Request): Promise<PlatformAdminC
   return { userId: data.user.id };
 }
 
-export async function requireStaff(req: Request, roles: StaffRole[]): Promise<StaffContext> {
+export async function requireStaff(req: Request, roles: StaffRole[], options: { allowExpired?: boolean } = {}): Promise<StaffContext> {
   const header = req.headers.get("Authorization") ?? "";
   const match = /^Bearer\s+(.+)$/i.exec(header);
   if (!match) throw new HttpError(401, "unauthorized", "Jeton d'authentification manquant.");
@@ -73,7 +73,7 @@ export async function requireStaff(req: Request, roles: StaffRole[]): Promise<St
 
   const { data: staff, error } = await adminClient()
     .from("staff_members")
-    .select("id, cafe_id, role, is_active, display_name, cafes!inner(is_active)")
+    .select("id, cafe_id, role, is_active, display_name, cafes!inner(is_active, access_until)")
     .eq("id", userData.user.id)
     .maybeSingle();
 
@@ -84,7 +84,7 @@ export async function requireStaff(req: Request, roles: StaffRole[]): Promise<St
   if (!staff || !staff.is_active || !cafe?.is_active) {
     throw new HttpError(403, "forbidden", "Accès réservé au personnel actif d'un café actif.");
   }
-  if (!roles.includes(staff.role as StaffRole)) {
+  if (!options.allowExpired && cafe.access_until && new Date(cafe.access_until).getTime() <= Date.now()) {\n    throw new HttpError(403, "subscription_expired", "L’accès au café est expiré. Activez une nouvelle clé pour le renouveler.");\n  }\n  if (!roles.includes(staff.role as StaffRole)) {
     throw new HttpError(403, "forbidden_role", "Votre rôle ne permet pas cette action.");
   }
 
