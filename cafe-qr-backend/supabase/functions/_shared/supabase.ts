@@ -47,7 +47,7 @@ export type PlatformAdminContext = { userId: string };
 
 export async function requirePlatformAdmin(req: Request): Promise<PlatformAdminContext> {
   const header = req.headers.get("Authorization") ?? "";
-  const match = /^Bearer\\s+(.+)$/i.exec(header);
+  const match = /^Bearer\s+(.+)$/i.exec(header);
   if (!match) throw new HttpError(401, "unauthorized", "Jeton d'authentification manquant.");
   const admin = adminClient();
   const { data, error } = await admin.auth.getUser(match[1]);
