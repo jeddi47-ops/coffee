@@ -50,6 +50,11 @@ export default function PlatformAdminPage() {
     void loadDashboard();
   }, [loadDashboard]);
 
+  useEffect(() => {
+    const timer = window.setInterval(() => void loadDashboard(), 30_000);
+    return () => window.clearInterval(timer);
+  }, [loadDashboard]);
+
   const csv = useMemo(() => batch?.codes.map((code) => `"${code}"`).join("\r\n") ?? "", [batch]);
 
   const downloadCsv = () => {
