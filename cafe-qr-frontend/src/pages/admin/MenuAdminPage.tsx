@@ -1,6 +1,6 @@
 // /admin : menu (catégories, produits, photos, promotions, ordre) + aperçu client.
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
-import { ArrowDown, ArrowUp, Eye, EyeOff, Pencil, Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Cake, Coffee, Eye, EyeOff, Info, Layers, Pencil, Plus, ShoppingBag, Trash2, Utensils } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 import { publicAssetUrl } from "../../lib/env";
 import { formatMoney } from "../../lib/money";
@@ -20,6 +20,14 @@ import { ProductForm } from "./ProductForm";
 import { assertWritten, buildPreviewMenu, loadCatalog, reorder, useStaffProfile } from "./adminData";
 
 type Confirm = { title: string; message: string; run: () => Promise<void> } | null;
+
+function CategoryIcon({ name }: { name: string }) {
+  const value = name.toLocaleLowerCase("fr");
+  const Icon = /boisson|drink|café|cafe/.test(value) ? Coffee
+    : /dessert|sucr|cake|gâteau/.test(value) ? Cake
+      : /plat|repas|food|entrée/.test(value) ? Utensils : Layers;
+  return <Icon className="h-5 w-5" aria-hidden="true" />;
+}
 
 export default function MenuAdminPage() {
   const { cafe } = useStaffProfile();
@@ -104,30 +112,33 @@ export default function MenuAdminPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold">{fr.admin.menuTitle}</h1>
-        <Button variant="secondary" onClick={() => setPreview(true)}>
+      <div className="grid items-start gap-7 lg:grid-cols-[minmax(0,1fr)_18rem]">
+        <div className="min-w-0 space-y-6">
+      <header className="flex flex-wrap items-start justify-between gap-3">
+        <div><h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">{fr.admin.menuTitle}</h1><p className="mt-2 max-w-2xl text-base text-muted">Gérez les catégories, les produits et l’organisation du menu de votre café.</p></div>
+        <Button variant="secondary" className="rounded-full bg-white px-5 shadow-sm" onClick={() => setPreview(true)}>
           <Eye className="h-4 w-4" aria-hidden="true" />
-          {fr.admin.preview}
+          Aperçu client
         </Button>
-      </div>
-      <p className="rounded-card bg-surface-2 px-4 py-3 text-sm text-muted">{fr.admin.cacheNotice}</p>
+      </header>
+      <p className="flex items-center gap-3 rounded-2xl border border-[#d7b46b]/40 bg-[#d7b46b]/10 px-4 py-4 text-sm text-ink"><Info className="h-5 w-5 shrink-0 text-[#a87824]" aria-hidden="true" />{fr.admin.cacheNotice}</p>
       {error && <p role="alert" className="rounded-card bg-danger px-4 py-3 text-sm font-semibold text-danger-fg">{error}</p>}
 
-      <Card>
-        <h2 className="text-lg font-semibold">{fr.admin.categories}</h2>
-        <form onSubmit={addCategory} className="mt-3 flex gap-2">
+      <Card className="rounded-3xl border-black/[0.06] p-5 shadow-[0_12px_35px_rgba(27,24,19,0.06)] sm:p-7">
+        <div className="flex items-start gap-4"><span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#f5f2ed]"><Layers className="h-6 w-6" aria-hidden="true" /></span><div><h2 className="text-xl font-bold">{fr.admin.categories}</h2><p className="mt-1 text-sm text-muted">Organisez votre menu en catégories (ex. : Boissons, Plats, Desserts).</p></div></div>
+        <form onSubmit={addCategory} className="mt-5 flex flex-col gap-2 sm:flex-row">
           <label htmlFor="new-cat" className="sr-only">{fr.admin.categoryName}</label>
-          <Input id="new-cat" placeholder={fr.admin.newCategory} maxLength={80} value={newCategory} onChange={(e) => setNewCategory(e.target.value)} />
-          <Button type="submit" disabled={!newCategory.trim()}>
+          <Input id="new-cat" className="min-h-12 rounded-2xl border-[#dedbd5] bg-white" placeholder={fr.admin.newCategory} maxLength={80} value={newCategory} onChange={(e) => setNewCategory(e.target.value)} />
+          <Button type="submit" className="min-h-12 shrink-0 rounded-2xl bg-gradient-to-r from-[#dfb75e] to-[#b9842d] px-6 text-[#21180b] shadow-sm hover:opacity-90" disabled={!newCategory.trim()}>
             <Plus className="h-4 w-4" aria-hidden="true" />
             {fr.common.add}
           </Button>
         </form>
         {categories.length === 0 && <p className="mt-3 text-sm text-muted">{fr.admin.noCategories}</p>}
-        <ul className="mt-3 divide-y divide-line">
+        <ul className="mt-4 divide-y divide-black/[0.07]">
           {[...categories].sort((a, b) => a.position - b.position).map((c, idx, arr) => (
-            <li key={c.id} className="flex flex-wrap items-center gap-2 py-2">
+            <li key={c.id} className="flex flex-wrap items-center gap-3 py-3">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#f5f2ed]"><CategoryIcon name={c.name} /></span>
               {editingCat?.id === c.id ? (
                 <form
                   className="flex flex-1 gap-2"
@@ -143,11 +154,11 @@ export default function MenuAdminPage() {
                   <Button type="submit" size="sm">{fr.common.save}</Button>
                 </form>
               ) : (
-                <span className="min-w-0 flex-1 font-medium">
+                <span className="min-w-0 flex-1 font-semibold">
                   {c.name} {!c.is_visible && <Badge className="ml-2">{fr.admin.hidden}</Badge>}
                 </span>
               )}
-              <div className="flex items-center gap-1">
+              <div className="ml-auto flex items-center gap-1 sm:gap-2">
                 <Button variant="ghost" size="icon" aria-label={`${fr.common.moveUp} ${c.name}`} disabled={idx === 0} onClick={() => void moveCategory(c.id, -1)}>
                   <ArrowUp className="h-4 w-4" aria-hidden="true" />
                 </Button>
@@ -184,9 +195,9 @@ export default function MenuAdminPage() {
         </ul>
       </Card>
 
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="text-xl font-bold">{fr.admin.products}</h2>
-        <Button onClick={() => setForm({ product: null })} disabled={categories.length === 0}>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-4"><span className="flex h-12 w-12 items-center justify-center rounded-full bg-[#f5f2ed]"><ShoppingBag className="h-6 w-6" aria-hidden="true" /></span><div><h2 className="text-2xl font-extrabold">{fr.admin.products}</h2><p className="mt-1 text-sm text-muted">Ajoutez et gérez les produits du menu, par catégorie.</p></div></div>
+        <Button className="min-h-12 rounded-2xl bg-gradient-to-r from-[#dfb75e] to-[#b9842d] px-6 text-[#21180b] shadow-sm hover:opacity-90" onClick={() => setForm({ product: null })} disabled={categories.length === 0}>
           <Plus className="h-4 w-4" aria-hidden="true" />
           {fr.admin.newProduct}
         </Button>
@@ -195,10 +206,10 @@ export default function MenuAdminPage() {
       {[...categories].sort((a, b) => a.position - b.position).map((c) => {
         const items = products.filter((p) => p.category_id === c.id).sort((a, b) => a.position - b.position);
         return (
-          <Card key={c.id}>
+          <Card key={c.id} className="rounded-3xl border-black/[0.06] p-5 shadow-[0_12px_35px_rgba(27,24,19,0.06)] sm:p-6">
             <div className="flex items-center justify-between gap-2">
-              <h3 className="font-semibold">{c.name}</h3>
-              <Button variant="ghost" size="sm" onClick={() => setForm({ product: null, categoryId: c.id })}>
+              <div className="flex min-w-0 items-center gap-3"><span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#f5f2ed]"><CategoryIcon name={c.name} /></span><h3 className="truncate font-bold">{c.name}</h3></div>
+              <Button variant="secondary" size="sm" className="rounded-2xl bg-white" onClick={() => setForm({ product: null, categoryId: c.id })}>
                 <Plus className="h-4 w-4" aria-hidden="true" />
                 {fr.common.add}
               </Button>
@@ -293,6 +304,16 @@ export default function MenuAdminPage() {
           </div>
         )}
       </Dialog>
+        </div>
+        <aside className="hidden space-y-5 lg:block">
+          <Card className="overflow-hidden rounded-3xl border-0 bg-[#111110] p-0 text-white shadow-lg">
+            <div className="h-36 bg-gradient-to-br from-[#29251d] via-[#171614] to-[#080808] p-6"><div className="flex h-full items-end"><Eye className="h-9 w-9 text-[#d7ad55]" aria-hidden="true" /></div></div>
+            <div className="space-y-4 p-5"><div><h2 className="text-xl font-bold">Votre menu, côté client</h2><p className="mt-2 text-sm leading-relaxed text-white/70">Prévisualisez l’expérience de vos clients et vérifiez vos changements.</p></div><Button variant="secondary" className="w-full rounded-2xl bg-white text-ink" onClick={() => setPreview(true)}><Eye className="h-4 w-4" aria-hidden="true" />Aperçu client</Button></div>
+          </Card>
+          <Card className="rounded-3xl border-black/[0.06] p-5"><h2 className="font-bold">Besoin d’aide ?</h2><p className="mt-2 text-sm text-muted">Les catégories et produits affichés sont enregistrés automatiquement.</p></Card>
+        </aside>
+      </div>
     </div>
   );
 }
+
