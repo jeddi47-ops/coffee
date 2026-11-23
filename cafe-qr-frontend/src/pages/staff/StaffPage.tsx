@@ -2,7 +2,7 @@ import { StaffLoyalty } from "../Loyalty";
 // /staff : écran de service en temps réel (commandes, appels, tables, ruptures).
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Bell, LogOut, Moon, Settings, Sun, Volume2, VolumeX } from "lucide-react";
+import { Coffee, ConciergeBell, Grid2X2, ScanLine, MoreHorizontal, Bell, LogOut, Moon, Settings, Sun, Volume2, VolumeX } from "lucide-react";
 import { useAuthStore } from "../../stores/authStore";
 import { useStaffStore } from "../../stores/staffStore";
 import { staffRpc } from "../../lib/api";
@@ -18,12 +18,12 @@ import { ListSkeleton } from "../../components/Skeletons";
 import type { OrderStatus, ProductRow, StaffOrder, TableSessionRow, WaiterCallRow } from "../../types/api";
 import { OrderCard } from "./OrderCard";
 import { PushBanner } from "./PushBanner";
-import { CallsPanel } from "./CallsPanel";
+import { minutesSince } from "../../lib/time";
 import { TablesView } from "./TablesView";
 import { AvailabilityList } from "./AvailabilityList";
 import { reloadAll, reloadCalls, reloadOrder, reloadTables, useStaffData } from "./useStaffData";
 
-type Tab = "orders" | "calls" | "tables" | "stock" | "loyalty";
+type Tab = "orders" | "tables" | "stock" | "loyalty";
 
 export default function StaffPage() {
   const profile = useAuthStore((s) => s.profile);
@@ -145,81 +145,58 @@ export default function StaffPage() {
       useStaffStore.getState().upsertProduct(updated);
     });
 
-  const tabs: { id: Tab; label: string; count?: number }[] = [
-    { id: "orders", label: fr.staff.tabs.orders, count: pending.length },
-    { id: "calls", label: fr.staff.tabs.calls, count: calls.length },
-    { id: "tables", label: fr.staff.tabs.tables },
-    { id: "stock", label: fr.staff.tabs.stock },
-    { id: "loyalty", label: "Fidélité" },
-  ];
+  const tabs = [
+    { id: "orders", label: "Service", Icon: ConciergeBell },
+    { id: "tables", label: "Tables", Icon: Grid2X2 },
+    { id: "loyalty", label: "Scanner", Icon: ScanLine },
+    { id: "stock", label: "Plus", Icon: MoreHorizontal },
+  ] as const;
+  const queue = [
+    ...calls.map(call => ({ kind: "call" as const, item: call })),
+    ...pending.map(order => ({ kind: "order" as const, item: order })),
+  ].sort((a,b) => a.item.created_at.localeCompare(b.item.created_at));
 
   return (
-    <div data-theme={st.night ? "dark" : "light"} className={cn("min-h-screen bg-bg text-ink", st.night && "staff-night")}>
-      <header className="sticky top-0 z-30 border-b border-line bg-surface">
+    <div data-theme={st.night ? "dark" : "light"} className={cn("min-h-screen text-ink", st.night ? "staff-night bg-bg" : "bg-[#fbf7ef]")}>
+      <header className="sticky top-0 z-30 bg-[#211a13] text-white">
         <ConnectionBanner online={st.online} />
-        <div className="flex items-center gap-2 px-3 py-2">
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-lg font-bold">{staff.cafe.name}</p>
-            <p className="truncate text-xs text-muted">{staff.staff.display_name} · {fr.admin.roles[staff.staff.role]}</p>
-          </div>
-          <Button variant="ghost" size="icon" onClick={() => st.setSoundOn(!st.soundOn)} aria-label={fr.staff.sound} aria-pressed={st.soundOn}>
-            {st.soundOn ? <Volume2 className="h-5 w-5" aria-hidden="true" /> : <VolumeX className="h-5 w-5" aria-hidden="true" />}
-          </Button>
-          <Button variant="ghost" size="icon" onClick={() => st.setNight(!st.night)} aria-label={fr.staff.night} aria-pressed={st.night}>
-            {st.night ? <Sun className="h-5 w-5" aria-hidden="true" /> : <Moon className="h-5 w-5" aria-hidden="true" />}
-          </Button>
-          {staff.staff.role !== "waiter" && (
-            <Link to="/admin" aria-label={fr.staff.adminLink} className="flex h-11 w-11 items-center justify-center rounded-card hover:bg-surface-2">
-              <Settings className="h-5 w-5" aria-hidden="true" />
-            </Link>
-          )}
-          <Button variant="ghost" size="icon" onClick={() => void signOut(null)} aria-label={fr.common.logout}>
-            <LogOut className="h-5 w-5" aria-hidden="true" />
-          </Button>
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-2">
+          <span className="flex items-center gap-2 text-xl font-bold text-[#ebc577]"><Coffee /> Café QR</span>
+          <Button variant="ghost" size="icon" onClick={() => st.setSoundOn(!st.soundOn)} aria-label={fr.staff.sound} aria-pressed={st.soundOn}>{st.soundOn ? <Volume2/> : <VolumeX/>}</Button>
         </div>
-        <nav className="no-scrollbar flex gap-1 overflow-x-auto px-2 pb-2" aria-label={fr.staff.title}>
-          {tabs.map((t) => (
-            <button
-              key={t.id}
-              type="button"
-              onClick={() => setTab(t.id)}
-              aria-current={tab === t.id ? "page" : undefined}
-              className={cn(
-                "flex min-h-[48px] shrink-0 items-center gap-2 rounded-card px-4 text-base font-bold",
-                tab === t.id ? "bg-accent text-accent-fg" : "text-ink hover:bg-surface-2",
-              )}
-            >
-              {t.id === "calls" && <Bell className="h-4 w-4" aria-hidden="true" />}
-              {t.label}
-              {t.count ? (
-                <span className={cn("flex h-6 min-w-6 items-center justify-center rounded-full px-1.5 text-xs", t.id === "calls" ? "bg-danger text-danger-fg" : "bg-surface-2 text-ink")}>
-                  {t.count}
-                </span>
-              ) : null}
-            </button>
-          ))}
-        </nav>
       </header>
-
-      <PushBanner state={pushState} onEnable={() => void enableAlerts().then(setPushState)} />
-
+      <nav aria-label="Navigation du service" className="safe-bottom fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface">
+        <div className="mx-auto grid max-w-lg grid-cols-4">{tabs.map(({id,label,Icon}) => (
+          <button key={id} type="button" aria-current={tab === id ? "page" : undefined}
+            className={cn("flex min-h-[62px] flex-col items-center justify-center gap-1 text-xs font-bold",tab === id && (st.night ? "text-amber-300" : "text-[#875d0d]"))}
+            onClick={() => { setTab(id); window.scrollTo(0,0); }}><Icon aria-hidden="true"/>{label}{id === "orders" && tab !== id && queue.length > 0 && ` (${queue.length})`}</button>
+        ))}</div>
+      </nav>
       {message && (
         <div role="alert" className="sticky top-[120px] z-20 mx-3 mt-3 rounded-card bg-danger px-4 py-3 text-sm font-semibold text-danger-fg">
           {message}
         </div>
       )}
 
-      <main className="p-3 pb-10">
+      <main className="mx-auto max-w-5xl space-y-5 px-4 pb-28 pt-5">
+        <header><h1 className="text-3xl font-black">{tab === "orders" ? "Service en salle" : tabs.find(t => t.id === tab)?.label}</h1>
+        <p className="mt-1 text-muted">{staff.staff.display_name} · {fr.admin.roles[staff.staff.role]} · {staff.cafe.name}</p></header>
         {tab === "loyalty" ? <StaffLoyalty /> : !st.loaded ? (
           <ListSkeleton rows={4} />
         ) : tab === "orders" ? (
           <div className="grid gap-4 md:grid-cols-2">
             <section aria-labelledby="col-pending">
-              <h2 id="col-pending" className="mb-3 text-lg font-bold">{fr.staff.toAccept} ({pending.length})</h2>
+              <h2 id="col-pending" className="mb-3 text-lg font-bold">À traiter · {queue.length}</h2>
               <div className="space-y-3">
-                {pending.length === 0 && <p className="text-muted">{fr.staff.noPending}</p>}
-                {pending.map((o) => (
-                  <OrderCard key={o.id} order={o} currency={currency} now={now} busy={busyId === o.id} onTransition={transition} />
+                {!queue.length && <p className="text-muted">Aucune demande en attente.</p>}
+                {queue.map(entry => entry.kind === "order" ? (
+                  <OrderCard key={"order-"+entry.item.id} order={entry.item} currency={currency} now={now} busy={busyId === entry.item.id} onTransition={transition} />
+                ) : (
+                  <article key={"call-"+entry.item.id} className="rounded-card border border-line border-l-4 border-l-amber-600 bg-surface p-4">
+                    <div className="flex items-center justify-between"><span className="flex items-center gap-2 font-bold"><Bell size={18}/> Appel serveur</span><span className="text-sm text-muted">{minutesSince(entry.item.created_at,now)} min</span></div>
+                    <h3 className="my-2 text-2xl font-black">{fr.staff.tableName(tableLabel(entry.item.table_id))}</h3>
+                    <Button size="lg" className="w-full" disabled={busyId === entry.item.id} onClick={() => void handleCall(entry.item)}>Prendre en charge</Button>
+                  </article>
                 ))}
               </div>
             </section>
@@ -233,10 +210,6 @@ export default function StaffPage() {
               </div>
             </section>
           </div>
-        ) : tab === "calls" ? (
-          <section aria-label={fr.staff.calls}>
-            <CallsPanel calls={calls} tableLabel={tableLabel} now={now} busyId={busyId} onHandle={(c) => void handleCall(c)} />
-          </section>
         ) : tab === "tables" ? (
           <TablesView
             tables={st.tables}
@@ -248,7 +221,13 @@ export default function StaffPage() {
             onSettle={settle}
           />
         ) : (
-          <AvailabilityList categories={st.categories} products={st.products} busyId={busyId} onToggle={(p, out) => void toggleStock(p, out)} />
+          <div className="space-y-4">
+            <PushBanner state={pushState} onEnable={() => void enableAlerts().then(setPushState)} />
+            <Button variant="secondary" aria-pressed={st.night} onClick={() => st.setNight(!st.night)}>{st.night ? <Sun/> : <Moon/>} Mode nuit</Button>
+            {staff.staff.role !== "waiter" && <Link className="flex min-h-11 items-center gap-2" to="/admin"><Settings/>Administration</Link>}
+            <Button variant="ghost" onClick={() => void signOut(null)}><LogOut/> Se déconnecter</Button>
+            <h2 className="text-xl font-bold">Disponibilité des produits</h2>
+          <AvailabilityList categories={st.categories} products={st.products} busyId={busyId} onToggle={(p, out) => void toggleStock(p, out)} /></div>
         )}
       </main>
 
