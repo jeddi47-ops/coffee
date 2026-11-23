@@ -19,10 +19,22 @@ export default function RegisterPage() {
     e.preventDefault();
     setBusy(true); setError("");
     try {
+      const code = key.replace(/[\s\u200b\ufeff]/gu, "").replace(/[‐‑‒–—−]/gu, "-").toUpperCase();
+      if (!/^CAFE-[MA](?:-[0-9A-F]{8}){4}$/.test(code)) {
+        throw new Error("Copiez la clé complète, du préfixe CAFE- jusqu’au dernier caractère.");
+      }
       const { data, error } = await supabase.functions.invoke("register-cafe", {
-        body: { cafe_name: cafe, owner_name: owner, email, access_key: key },
+        body: { cafe_name: cafe, owner_name: owner, email, access_key: code },
       });
-      if (error || !data?.success) throw new Error(data?.message ?? "Inscription impossible. Vérifiez la clé et réessayez.");
+      if (error || !data?.success) {
+        const response = error?.context;
+        if (response instanceof Response) {
+          if (response.status === 429) throw new Error("Trop de tentatives. Patientez une heure avant de réessayer.");
+          const body = await response.json().catch(() => null);
+          if (typeof body?.error?.message === "string") throw new Error(body.error.message);
+        }
+        throw new Error("L’inscription a échoué. Vérifiez votre connexion et réessayez.");
+      }
       setDone(true);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Une erreur est survenue.");
