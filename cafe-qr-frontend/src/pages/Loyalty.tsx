@@ -674,11 +674,15 @@ export default function LoyaltyAdmin() {
                     id="loyalty-note"
                     required
                     maxLength={300}
+                    placeholder="Ex. tampon oublié lors de la visite"
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
                   />
                 </Field>
-                <Button disabled={busy || delta === 0}>
+                <p className="text-sm text-muted">
+                  Le motif est obligatoire pour garder une trace de la correction.
+                </p>
+                <Button type="submit" disabled={busy || delta === 0}>
                   Appliquer la correction
                 </Button>
               </form>
