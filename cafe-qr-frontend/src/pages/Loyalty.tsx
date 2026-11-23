@@ -76,17 +76,38 @@ function designFor(color: string) {
   return cardDesigns.find((design) => design.color === color.toLowerCase()) ??
     { name: "Modèle actuel", color, ink: "#ffffff", background: `linear-gradient(120deg, #211d19 35%, ${color})`, Icon: Coffee };
 }
-function CardFace({ color, name, logo, small = false }: {
-  color: string; name: string; logo?: string | null; small?: boolean;
-}) {
+type CardFaceProps = Pick<LoyaltyCard, "color" | "name" | "target" | "stamps" | "reward" | "rule"> & {
+  logo?: string | null;
+  enabled?: boolean;
+};
+
+function CardFace({ color, name, logo, target, stamps, reward, rule, enabled = true }: CardFaceProps) {
   const { Icon, ink, background } = designFor(color);
-  return <div style={{ background, color: ink }} className="relative isolate overflow-hidden rounded-xl p-5 text-left">
-    <Icon aria-hidden="true" className="pointer-events-none absolute -right-4 -top-3 -z-10 h-28 w-28 rotate-12 opacity-15" />
-    {logo ? <img src={logo} alt="" className="mb-3 h-9 w-9 rounded-full object-cover" /> : <Icon aria-hidden="true" className="mb-3 h-8 w-8" />}
-    <p className="text-xs uppercase tracking-widest">Carte de fidélité</p>
-    <p className="break-words text-xl font-bold">{name}</p>
-    {small && <div aria-hidden="true" className="mt-3 flex gap-1">{Array.from({length: 5}, (_, i) => <span key={i} className="h-3 w-3 rounded-full border border-current" />)}</div>}
-  </div>;
+  return (
+    <div style={{ background, color: ink }} className="relative isolate mx-auto flex min-h-80 w-full max-w-sm flex-col overflow-hidden rounded-3xl p-5 text-center shadow-md">
+      <Icon aria-hidden="true" className="pointer-events-none absolute -right-10 top-8 -z-10 h-48 w-48 rotate-12 opacity-10" />
+      {logo ? <img src={logo} alt="" className="mx-auto mb-2 h-12 w-12 rounded-full object-cover" /> : <Icon aria-hidden="true" className="mx-auto mb-2 h-10 w-10" />}
+      <p className="break-words text-2xl font-bold">{name}</p>
+      <p className="text-xs uppercase tracking-widest">Carte de fidélité</p>
+      <div className="my-auto py-5">
+        <div className="mx-auto grid max-w-64 grid-cols-5 gap-2" aria-hidden="true">
+          {Array.from({ length: target }, (_, index) => (
+            <span key={index} style={index < stamps ? { backgroundColor: ink, color } : undefined}
+              className="flex aspect-square items-center justify-center rounded-full border-2 border-current font-bold">
+              {index < stamps && "✓"}
+            </span>
+          ))}
+        </div>
+        <p className="mt-2 text-sm font-semibold">{stamps} / {target} tampons</p>
+      </div>
+      <div className="rounded-xl border border-current px-3 py-2">
+        <p className="break-words font-bold">{reward}</p>
+        <p className="break-words text-sm">{rule}</p>
+      </div>
+      {!enabled ? <p className="mt-2 text-sm">Programme momentanément suspendu.</p> :
+        stamps >= target && <p className="mt-2 font-semibold">Récompense disponible · Présentez votre QR au serveur.</p>}
+    </div>
+  );
 }
 function Balance({ card }: { card: LoyaltyCard }) {
   const progress = Math.min(card.stamps, card.target);
@@ -229,15 +250,7 @@ export function CustomerLoyalty() {
             </p>
           )}
           {data.cards.map((c) => (
-            <Card key={c.id}>
-              <div className="mb-4"><CardFace color={c.color} name={c.name} logo={publicAssetUrl(c.logo_path)} /></div>
-              <Balance card={c} />
-              {!c.enabled && (
-                <p className="mt-2 text-sm">
-                  Programme momentanément suspendu.
-                </p>
-              )}
-            </Card>
+            <CardFace key={c.id} {...c} logo={publicAssetUrl(c.logo_path)} />
           ))}
         </>
       )}
@@ -586,7 +599,8 @@ export default function LoyaltyAdmin() {
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {(cardDesigns.some((d) => d.color === program.color.toLowerCase()) ? cardDesigns : [designFor(program.color), ...cardDesigns]).map((d) => (
                     <label key={d.color} className="cursor-pointer">
-                      <CardFace color={d.color} name={cafe.name} small logo={publicAssetUrl(program.logo_path)} />
+                      <CardFace color={d.color} name={cafe.name} target={Math.max(2, Math.min(100, Number(program.target) || 10))} stamps={0}
+                        reward={program.reward || "Votre récompense"} rule={program.rule} logo={publicAssetUrl(program.logo_path)} />
                       <span className="mt-2 flex items-center gap-2 font-semibold">
                         <input type="radio" name="card-design" checked={program.color.toLowerCase() === d.color.toLowerCase()} onChange={() => setProgram({ ...program, color: d.color })} />
                         {d.name}
