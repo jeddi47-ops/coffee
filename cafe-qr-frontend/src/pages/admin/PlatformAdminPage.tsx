@@ -1,3 +1,4 @@
+import { MetricsSkeleton } from "../../components/Skeletons";
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "../../components/ui/button";
@@ -30,7 +31,7 @@ export default function PlatformAdminPage() {
   const [quantity, setQuantity] = useState("25");
   const [batch, setBatch] = useState<GeneratedBatch | null>(null);
   const [busy, setBusy] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const loadDashboard = useCallback(async () => {
@@ -125,7 +126,7 @@ export default function PlatformAdminPage() {
         )}
 
         {loading && !dashboard ? (
-          <p role="status" className="text-sm text-muted">{fr.platformAdmin.loading}</p>
+          <MetricsSkeleton />
         ) : dashboard ? (
           <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label={fr.platformAdmin.title}>
             <Metric label={fr.platformAdmin.revenue} value={money(dashboard.revenue_usd)} detail={`${dashboard.activations.total} ${fr.platformAdmin.totalKeys.toLowerCase()}`} />

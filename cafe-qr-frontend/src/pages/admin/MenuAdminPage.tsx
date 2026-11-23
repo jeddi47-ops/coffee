@@ -13,7 +13,7 @@ import { Input } from "../../components/ui/input";
 import { Badge, Card } from "../../components/ui/card";
 import { Dialog } from "../../components/ui/dialog";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
-import { ListSkeleton } from "../../components/Skeletons";
+import { AdminContentSkeleton } from "../../components/Skeletons";
 import { MenuView } from "../../components/MenuView";
 import { ThemeScope } from "../../components/ThemeScope";
 import { ProductForm } from "./ProductForm";
@@ -108,7 +108,7 @@ export default function MenuAdminPage() {
   );
   const previewTheme = useMemo(() => buildTheme(cafe.theme_accent, cafe.theme_mode), [cafe]);
 
-  if (!categories) return error ? <p role="alert" className="text-danger">{error}</p> : <ListSkeleton rows={5} />;
+  if (!categories) return error ? <p role="alert" className="text-danger">{error}</p> : <AdminContentSkeleton />;
 
   return (
     <div className="space-y-6">

@@ -1,10 +1,11 @@
 // /admin : barre latérale (menu burger sur mobile). Équipe et Réglages : owner uniquement.
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
 import { ChefHat, LayoutList, LogOut, Megaphone, Menu as MenuIcon, MonitorSmartphone, QrCode, Settings, Users, X } from "lucide-react";
 import { useAuthStore } from "../../stores/authStore";
 import { useStaffProfile } from "./adminData";
 import { fr } from "../../i18n/fr";
+import { AdminContentSkeleton } from "../../components/Skeletons";
 import { cn } from "../../lib/utils";
 import { Button } from "../../components/ui/button";
 
@@ -96,7 +97,7 @@ export default function AdminLayout() {
 
       <main className={`min-w-0 flex-1 p-4 lg:p-8 ${isAdminArea ? "pb-24 lg:pb-8" : ""}`}>
         <div className={`mx-auto ${isAdminArea ? "max-w-[1500px]" : "max-w-4xl"}`}>
-          <Outlet />
+          <Suspense fallback={<AdminContentSkeleton />}><Outlet /></Suspense>
         </div>
       </main>
       {isAdminArea && <nav style={{ gridTemplateColumns: `repeat(${links.length}, minmax(0, 1fr))` }} className="safe-bottom fixed inset-x-0 bottom-0 z-30 grid border-t border-white/10 bg-[#111110] px-1 pt-2 text-white shadow-[0_-8px_30px_rgba(0,0,0,0.12)] lg:hidden" aria-label={fr.admin.nav.menu}>

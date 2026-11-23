@@ -1,3 +1,4 @@
+import { ListSkeleton } from "../../components/Skeletons";
 // /auth/callback : retour des liens magiques (client), d'invitation et de réinitialisation (personnel).
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -70,9 +71,7 @@ export default function AuthCallbackPage() {
       {failed ? (
         <Button className="w-full" onClick={() => navigate("/login", { replace: true })}>{fr.auth.backToLogin}</Button>
       ) : (
-        <div className="flex justify-center" aria-busy="true">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-line border-t-accent" />
-        </div>
+        <ListSkeleton rows={1} />
       )}
     </AuthLayout>
   );

@@ -1,3 +1,4 @@
+import { ListSkeleton } from "../../components/Skeletons";
 import { useState } from "react";
 import { Dialog } from "../../components/ui/dialog";
 import { Button } from "../../components/ui/button";
@@ -55,7 +56,7 @@ export function TableStatePanel({
   const content = (
     <>
       {!state ? (
-        <p className="py-6 text-center text-muted">{fr.common.loading}</p>
+        <ListSkeleton rows={3} />
       ) : (
         <>
           {(!state.session || state.orders.length === 0) && (

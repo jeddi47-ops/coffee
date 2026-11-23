@@ -14,7 +14,7 @@ import { Input } from "../../components/ui/input";
 import { Badge, Card } from "../../components/ui/card";
 import { Switch } from "../../components/ui/switch";
 import { ConfirmDialog } from "../../components/ConfirmDialog";
-import { ListSkeleton } from "../../components/Skeletons";
+import { AdminContentSkeleton } from "../../components/Skeletons";
 import { initials } from "../../components/CafeHeader";
 import { assertWritten, useStaffProfile } from "./adminData";
 
@@ -72,7 +72,7 @@ export default function TablesAdminPage() {
   const logo = publicAssetUrl(cafe.logo_path);
   const printable = (tables ?? []).filter((t) => t.is_active);
 
-  if (!tables) return error ? <p role="alert" className="text-danger">{error}</p> : <ListSkeleton rows={4} />;
+  if (!tables) return error ? <p role="alert" className="text-danger">{error}</p> : <AdminContentSkeleton />;
 
   return (
     <div className="space-y-6">
