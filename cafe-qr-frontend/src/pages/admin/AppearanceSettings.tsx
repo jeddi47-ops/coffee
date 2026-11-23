@@ -1,6 +1,6 @@
 // Bloc « Apparence » (owner uniquement) : couleur d'accent, mode, phrase d'accroche, aperçu en direct.
 import { useEffect, useMemo, useState } from "react";
-import { Check } from "lucide-react";
+import { Check, Palette } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 import { buildTheme, DEFAULT_ACCENT, isValidHex, SUGGESTED_ACCENTS, type ThemeMode } from "../../lib/theme";
 import { errorMessage } from "../../lib/errors";
@@ -76,9 +76,8 @@ export function AppearanceSettings({ cafe }: { cafe: CafeRow }) {
   };
 
   return (
-    <Card>
-      <h2 className="text-lg font-semibold">{fr.admin.appearance}</h2>
-      <p className="mt-1 text-sm text-muted">{fr.admin.appearanceIntro}</p>
+    <Card className="rounded-3xl border-black/[0.06] p-5 shadow-[0_12px_35px_rgba(27,24,19,0.06)] sm:p-7">
+      <div className="flex items-start gap-4"><span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#f5f2ed]"><Palette className="h-6 w-6" aria-hidden="true" /></span><div><h2 className="text-xl font-bold">{fr.admin.appearance}</h2><p className="mt-1 text-sm text-muted">{fr.admin.appearanceIntro}</p></div></div>
 
       <div className="mt-4 grid gap-6 lg:grid-cols-[1fr_320px]">
         <div className="space-y-5">
@@ -116,7 +115,7 @@ export function AppearanceSettings({ cafe }: { cafe: CafeRow }) {
                   type="button"
                   onClick={() => setMode(m)}
                   aria-pressed={mode === m}
-                  className={cn("min-h-[44px] flex-1 rounded-card border-2 px-4 text-sm font-semibold", mode === m ? "border-accent bg-accent text-accent-fg" : "border-line bg-surface")}
+                  className={cn("min-h-[44px] flex-1 rounded-2xl border-2 px-4 text-sm font-semibold", mode === m ? "border-[#b9842d] bg-gradient-to-r from-[#dfb75e] to-[#b9842d] text-[#21180b]" : "border-line bg-white")}
                 >
                   {fr.admin.modes[m]}
                 </button>
@@ -130,7 +129,7 @@ export function AppearanceSettings({ cafe }: { cafe: CafeRow }) {
 
           {error && <p role="alert" className="text-sm font-semibold text-danger">{error}</p>}
           {info && <p role="status" className="text-sm font-semibold">{info}</p>}
-          <Button onClick={() => void save()} disabled={busy || !valid}>{busy ? fr.common.saving : fr.common.save}</Button>
+          <Button className="rounded-2xl bg-gradient-to-r from-[#dfb75e] to-[#b9842d] px-6 text-[#21180b] shadow-sm hover:opacity-90" onClick={() => void save()} disabled={busy || !valid}>{busy ? fr.common.saving : fr.common.save}</Button>
         </div>
 
         <div aria-label={fr.admin.previewTitle} className="overflow-hidden rounded-[28px] border-4 border-ink">
@@ -146,3 +145,4 @@ export function AppearanceSettings({ cafe }: { cafe: CafeRow }) {
     </Card>
   );
 }
+

@@ -1,6 +1,6 @@
 // /admin/equipe (owner uniquement) : employés, invitations, activation.
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { UserPlus } from "lucide-react";
+import { UserPlus, Users } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 import { staffFunctions, staffRpc } from "../../lib/api";
 import { errorMessage, fromPostgrest } from "../../lib/errors";
@@ -69,12 +69,12 @@ export default function StaffAdminPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">{fr.admin.teamTitle}</h1>
+      <header><h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">{fr.admin.teamTitle}</h1><p className="mt-2 text-base text-muted">Invitez vos employés et gérez leurs accès à l’espace du café.</p></header>
       {error && <p role="alert" className="rounded-card bg-danger px-4 py-3 text-sm font-semibold text-danger-fg">{error}</p>}
-      {info && <p role="status" className="rounded-card bg-surface-2 px-4 py-3 text-sm font-semibold">{info}</p>}
+      {info && <p role="status" className="rounded-2xl border border-[#28764c]/20 bg-[#e7f3eb] px-4 py-3 text-sm font-semibold text-[#1f6b3e]">{info}</p>}
 
-      <Card>
-        <h2 className="text-lg font-semibold">{fr.admin.invite}</h2>
+      <Card className="rounded-3xl border-black/[0.06] p-5 shadow-[0_12px_35px_rgba(27,24,19,0.06)] sm:p-7">
+        <div className="flex items-start gap-4"><span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#f5f2ed]"><UserPlus className="h-6 w-6" aria-hidden="true" /></span><div><h2 className="text-xl font-bold">{fr.admin.invite}</h2><p className="mt-1 text-sm text-muted">L’employé recevra un email pour rejoindre votre équipe.</p></div></div>
         <form onSubmit={invite} className="mt-4 grid gap-4 sm:grid-cols-2">
           <Field label={fr.auth.email} htmlFor="inv-email">
             <Input id="inv-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -89,7 +89,7 @@ export default function StaffAdminPage() {
             </Select>
           </Field>
           <div className="flex items-end">
-            <Button type="submit" className="w-full" disabled={busy || !email.trim() || !name.trim()}>
+            <Button type="submit" className="w-full rounded-2xl bg-gradient-to-r from-[#dfb75e] to-[#b9842d] text-[#21180b] shadow-sm hover:opacity-90" disabled={busy || !email.trim() || !name.trim()}>
               <UserPlus className="h-4 w-4" aria-hidden="true" />
               {fr.admin.inviteSubmit}
             </Button>
@@ -97,22 +97,24 @@ export default function StaffAdminPage() {
         </form>
       </Card>
 
-      <Card>
+      <Card className="rounded-3xl border-black/[0.06] p-5 shadow-[0_12px_35px_rgba(27,24,19,0.06)] sm:p-7">
+        <div className="mb-3 flex items-start gap-4"><span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#f5f2ed]"><Users className="h-6 w-6" aria-hidden="true" /></span><div><h2 className="text-xl font-bold">Membres de l’équipe</h2><p className="mt-1 text-sm text-muted">Activez ou désactivez l’accès de chaque membre.</p></div></div>
         {!members ? (
           <ListSkeleton rows={3} />
         ) : (
-          <ul className="divide-y divide-line">
+          <ul className="divide-y divide-black/[0.07]">
             {members.map((m) => {
               const self = m.id === me.id;
               return (
-                <li key={m.id} className="flex flex-wrap items-center gap-3 py-3">
+                <li key={m.id} className="flex flex-wrap items-center gap-3 py-4">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#f5f2ed] text-sm font-bold text-[#806027]">{m.display_name.trim().slice(0, 1).toLocaleUpperCase("fr")}</span>
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold">
                       {m.display_name} {self && <span className="text-sm font-normal text-muted">({fr.admin.you})</span>}
                     </p>
                     <p className="text-xs text-muted">{formatDateTime(m.created_at)}</p>
                   </div>
-                  <Badge>{fr.admin.roles[m.role]}</Badge>
+                  <Badge className="bg-[#f5f2ed] text-[#60481e]">{fr.admin.roles[m.role]}</Badge>
                   <div className="w-full sm:w-56">
                     <Switch
                       checked={m.is_active}
@@ -131,3 +133,4 @@ export default function StaffAdminPage() {
     </div>
   );
 }
+

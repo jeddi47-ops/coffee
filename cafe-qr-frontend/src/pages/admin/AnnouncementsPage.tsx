@@ -1,6 +1,6 @@
 // /admin/nouveautes : brouillons, envoi par email (via send-announcement), lecture seule après envoi.
 import { useCallback, useEffect, useState, type FormEvent } from "react";
-import { ImagePlus, Plus, Send, Trash2 } from "lucide-react";
+import { ImagePlus, Megaphone, Plus, Send, Trash2 } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 import { publicAssetUrl } from "../../lib/env";
 import { staffFunctions, staffRpc } from "../../lib/api";
@@ -66,28 +66,30 @@ export default function AnnouncementsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">{fr.admin.newsTitle}</h1>
-          <p className="text-sm text-muted">{fr.admin.quotaHint}</p>
+          <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">{fr.admin.newsTitle}</h1>
+          <p className="mt-2 text-base text-muted">Partagez les actualités de votre café avec vos clients. {fr.admin.quotaHint}</p>
         </div>
-        <Button onClick={() => setEditing("new")}>
+        <Button className="rounded-2xl bg-gradient-to-r from-[#dfb75e] to-[#b9842d] px-5 text-[#21180b] shadow-sm hover:opacity-90" onClick={() => setEditing("new")}>
           <Plus className="h-4 w-4" aria-hidden="true" />
           {fr.admin.newAnnouncement}
         </Button>
-      </div>
+      </header>
       {error && <p role="alert" className="rounded-card bg-danger px-4 py-3 text-sm font-semibold text-danger-fg">{error}</p>}
-      {info && <p role="status" className="rounded-card bg-surface-2 px-4 py-3 text-sm font-semibold">{info}</p>}
+      {info && <p role="status" className="rounded-2xl border border-[#28764c]/20 bg-[#e7f3eb] px-4 py-3 text-sm font-semibold text-[#1f6b3e]">{info}</p>}
 
-      <Card>
+      <Card className="rounded-3xl border-black/[0.06] p-5 shadow-[0_12px_35px_rgba(27,24,19,0.06)] sm:p-7">
+        <div className="mb-4 flex items-start gap-4"><span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#f5f2ed]"><Megaphone className="h-6 w-6" aria-hidden="true" /></span><div><h2 className="text-xl font-bold">Vos annonces</h2><p className="mt-1 text-sm text-muted">Brouillons modifiables · annonces envoyées consultables.</p></div></div>
         {!items ? (
           <ListSkeleton rows={3} />
         ) : items.length === 0 ? (
-          <p className="text-muted">{fr.admin.noAnnouncements}</p>
+          <div className="rounded-2xl border border-dashed border-line p-8 text-center"><p className="text-muted">{fr.admin.noAnnouncements}</p><Button className="mt-4 rounded-2xl bg-gradient-to-r from-[#dfb75e] to-[#b9842d] text-[#21180b]" onClick={() => setEditing("new")}><Plus className="h-4 w-4" aria-hidden="true" />{fr.admin.newAnnouncement}</Button></div>
         ) : (
-          <ul className="divide-y divide-line">
+          <ul className="space-y-3">
             {items.map((a) => (
-              <li key={a.id} className="flex flex-wrap items-center gap-3 py-3">
+                <li key={a.id} className="flex flex-wrap items-center gap-3 rounded-2xl border border-black/[0.06] bg-white px-3 py-3 sm:px-4">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#f5f2ed] text-[#806027]"><Megaphone className="h-5 w-5" aria-hidden="true" /></span>
                 <button
                   type="button"
                   className="min-h-[44px] min-w-0 flex-1 text-left"
@@ -99,10 +101,10 @@ export default function AnnouncementsPage() {
                     {a.status === "sent" && ` · ${fr.admin.sentCount(a.sent_count)}`}
                   </p>
                 </button>
-                <Badge>{fr.admin.statuses[a.status]}</Badge>
+                <Badge className={a.status === "sent" ? "bg-[#e7f3eb] text-[#1f6b3e]" : "bg-[#fff4db] text-[#805c17]"}>{fr.admin.statuses[a.status]}</Badge>
                 {a.status === "draft" && (
                   <>
-                    <Button size="sm" onClick={() => void askSend(a)}>
+                    <Button size="sm" className="rounded-xl bg-gradient-to-r from-[#dfb75e] to-[#b9842d] text-[#21180b]" onClick={() => void askSend(a)}>
                       <Send className="h-4 w-4" aria-hidden="true" />
                       {fr.admin.send}
                     </Button>
@@ -267,3 +269,4 @@ function AnnouncementEditor({
     </Dialog>
   );
 }
+
