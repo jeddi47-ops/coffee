@@ -7,6 +7,7 @@ import { RequireStaff } from "./components/RequireAuth";
 
 const DesabonnementPage = lazy(() => import("./pages/DesabonnementPage"));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
+const LandingPage = lazy(() => import("./pages/LandingPage"));
 const AccountPage = lazy(() => import("./pages/customer/AccountPage"));
 const LoginPage = lazy(() => import("./pages/auth/LoginPage"));
 const RegisterPage = lazy(() => import("./pages/auth/RegisterPage"));
@@ -72,6 +73,6 @@ export const routes: RouteObject[] = [
       { path: "*", element: <Navigate to="/admin" replace /> },
     ],
   },
-  { path: "/", element: <Navigate to="/login" replace /> },
+  { path: "/", element: <LandingPage /> },
   { path: "*", element: <NotFoundPage /> },
 ];
