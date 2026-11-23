@@ -161,6 +161,18 @@ export const fr = {
     callWaiter: "Appeler un serveur",
     waiterComing: "Un serveur arrive",
     callSent: "Un serveur arrive.",
+    callScreenTitle: "Besoin d’un serveur ?",
+    callScreenDescription: "Touchez le bouton pour prévenir l’équipe. Elle saura que vous avez besoin d’aide à votre table.",
+    callScreenHint: "Votre demande sera envoyée directement à l’écran de service.",
+    callSendingTitle: "On prévient l’équipe",
+    callSendingDescription: "Votre demande est en cours d’envoi. Cela ne prend qu’un instant.",
+    callSendingButton: "Envoi en cours…",
+    callActiveTitle: "Un serveur arrive",
+    callActiveDescription: "Votre demande a été transmise à l’équipe. Vous pouvez rester tranquillement à votre table.",
+    callActiveStatus: "Appel envoyé",
+    callActiveHint: "L’équipe fermera l’appel lorsqu’elle l’aura pris en charge.",
+    callAction: "Appeler un serveur",
+    callCooldown: (seconds: number) => `Réessayer dans ${seconds} s`,
     status: {
       pending: "En attente de validation",
       accepted: "Acceptée",
@@ -448,3 +460,4 @@ export const fr = {
     invalidText: "Ce lien de désabonnement est invalide ou a expiré.",
   },
 };
+

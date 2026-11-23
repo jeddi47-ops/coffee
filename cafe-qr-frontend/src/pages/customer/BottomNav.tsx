@@ -1,10 +1,10 @@
 // Barre du bas (3 entrées) : Menu, Ma table, Serveur.
 // L'entrée de la vue affichée est repérée par une barre et une pastille aux couleurs du café (--accent).
-import { BellRing, ClipboardList, Clock, UtensilsCrossed } from "lucide-react";
+import { BellRing, ClipboardList, Clock, Loader2, UtensilsCrossed } from "lucide-react";
 import { fr } from "../../i18n/fr";
 import { cn } from "../../lib/utils";
 
-export type CustomerView = "menu" | "table";
+export type CustomerView = "menu" | "table" | "call";
 
 export function BottomNav({
   view,
@@ -27,8 +27,6 @@ export function BottomNav({
   onTable: () => void;
   onCall: () => void;
 }) {
-  const callDisabled = waiterComing || callCooldown > 0 || callBusy;
-
   const item = (active: boolean) =>
     cn(
       "relative flex min-h-[60px] flex-1 flex-col items-center justify-center gap-1 text-xs font-semibold",
@@ -69,17 +67,19 @@ export function BottomNav({
           <button
             type="button"
             onClick={onCall}
-            disabled={callDisabled}
+            aria-current={view === "call" ? "page" : undefined}
             aria-label={waiterComing ? fr.nav.waiterComingAria : fr.nav.callAria}
-            className={cn(item(false), waiterComing && "text-ink", "disabled:cursor-not-allowed")}
+            className={cn(item(view === "call"), waiterComing && "text-ink")}
           >
-            <span className={cn(pill(false), waiterComing && "bg-accent-soft")}>
-              {callCooldown > 0 ? <Clock className="h-5 w-5" aria-hidden="true" /> : <BellRing className="h-5 w-5" aria-hidden="true" />}
+            {view === "call" && bar}
+            <span className={cn(pill(view === "call"), waiterComing && "bg-accent-soft")}>
+              {callBusy ? <Loader2 className="h-5 w-5 animate-spin motion-reduce:animate-none" aria-hidden="true" /> : callCooldown > 0 ? <Clock className="h-5 w-5" aria-hidden="true" /> : <BellRing className="h-5 w-5" aria-hidden="true" />}
             </span>
-            {waiterComing ? fr.nav.waiterComing : callCooldown > 0 ? `${callCooldown} s` : fr.nav.call}
+            {waiterComing ? fr.nav.waiterComing : fr.nav.call}
           </button>
         )}
       </div>
     </nav>
   );
 }
+
