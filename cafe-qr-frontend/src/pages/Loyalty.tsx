@@ -1,4 +1,4 @@
-import { QrCode, Gift, Bell, Coffee, Croissant, Pizza, Leaf, CakeSlice, Utensils } from "lucide-react";
+import { QrCode, Gift, Bell, Coffee, Croissant, Pizza, Leaf, CakeSlice, Sandwich, Flame, Citrus, Utensils } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { enablePush } from "../lib/webpush";
 import type QrScanner from "qr-scanner";
@@ -71,6 +71,9 @@ const cardDesigns = [
   { name: "Boulangerie", color: "#935423", ink: "#523017", background: "repeating-linear-gradient(90deg, #f9ebd0 0 22px, #f3e1bd 22px 44px)", Icon: Croissant },
   { name: "Bar végétal", color: "#317553", ink: "#e2f7cf", background: "radial-gradient(ellipse at bottom right, #397550 0 30%, #225742 31% 55%, #123e32 56%)", Icon: Leaf },
   { name: "Pâtisserie", color: "#982956", ink: "#fff0f5", background: "radial-gradient(circle at 90% 0%, #aa466d 0 22%, transparent 23%), linear-gradient(120deg, #552039, #84284e)", Icon: CakeSlice },
+  { name: "Burger House", color: "#bb3828", ink: "#431c13", background: "repeating-conic-gradient(#bb3828 0 25%, #ffe8bc 0 50%) bottom / 22px 20px repeat-x, #fff0d4", Icon: Sandwich },
+  { name: "Grillades", color: "#ef6732", ink: "#ffead7", background: "linear-gradient(115deg, transparent 68%, #77413266 68% 71%, transparent 71% 74%, #77413266 74% 77%, transparent 77%), linear-gradient(145deg,#191717,#4b251e)", Icon: Flame },
+  { name: "Bar à jus", color: "#b1d74c", ink: "#193a31", background: "radial-gradient(circle at 100% 0%,#ffbc77 0 18%,#fff2bf 18% 20%,transparent 20%),linear-gradient(135deg,#dcf6cb,#93d5be)", Icon: Citrus },
 ];
 function designFor(color: string) {
   return cardDesigns.find((design) => design.color === color.toLowerCase()) ??
@@ -82,6 +85,9 @@ type CardFaceProps = Pick<LoyaltyCard, "color" | "name" | "target" | "stamps" | 
 };
 
 const faceStyles = {
+  "Burger House": { layout: "rounded-t-3xl rounded-b-lg border border-red-900/30 pb-9", heading: "font-black uppercase italic", stamp: "rounded-[35%]", footer: "rounded-full bg-red-800 text-white", fill: "#ab3024", mark: "#fff0d4" },
+  "Grillades": { layout: "rounded-sm border-l-8 border-orange-600", heading: "font-mono uppercase tracking-wider", stamp: "rounded-none skew-x-[-8deg]", footer: "border-t-2 border-orange-500", fill: "#ff9a57", mark: "#341a14" },
+  "Bar à jus": { layout: "rounded-tl-[3rem] rounded-br-[3rem] rounded-tr-xl rounded-bl-xl", heading: "font-bold tracking-tight", stamp: "rounded-tl-full rounded-br-full", footer: "rounded-2xl bg-emerald-950 text-lime-100", fill: "#1b6354", mark: "#efffc9" },
   "Café espresso": { layout: "rounded-3xl border-2 border-amber-300/70", heading: "font-serif", stamp: "rounded-full", footer: "rounded-xl border border-current", fill: "#efd092", mark: "#382710" },
   "Table bistro": { layout: "rounded-lg border-4 border-double border-rose-900 text-center", heading: "font-serif italic", stamp: "rounded-sm", footer: "border-y-4 border-double border-current", fill: "#751635", mark: "#fff8e9" },
   "Pizzeria": { layout: "rounded-2xl border-b-8 border-amber-400", heading: "uppercase font-black tracking-tight", stamp: "rounded-lg -rotate-3", footer: "rounded-md bg-amber-300 text-stone-950", fill: "#ffc24c", mark: "#272722" },
