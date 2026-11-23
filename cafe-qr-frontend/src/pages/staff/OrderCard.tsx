@@ -42,6 +42,7 @@ export function OrderCard({
       )}
       aria-label={`${fr.staff.tableName(order.table_label)}, ${fr.staff.orderTitle(order.order_number)}`}
     >
+      <p className="mb-2 text-sm font-bold">{order.status === "pending" ? "Nouvelle commande" : fr.table.status[order.status]}</p>
       <header className="flex items-start justify-between gap-2">
         <div>
           <p className="text-2xl font-black leading-none">{fr.staff.tableName(order.table_label)}</p>
@@ -82,7 +83,7 @@ export function OrderCard({
         )}
         {next && (
           <Button size="lg" className="flex-[2]" disabled={busy} onClick={() => void onTransition(order, next.to)}>
-            {next.label}
+            {order.status === "pending" ? "Accepter la commande" : next.label}
           </Button>
         )}
       </div>
