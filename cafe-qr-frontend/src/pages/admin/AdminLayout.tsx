@@ -1,7 +1,7 @@
 // /admin : barre latérale (menu burger sur mobile). Équipe et Réglages : owner uniquement.
 import { Suspense, useState } from "react";
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom";
-import { ChefHat, LayoutList, LogOut, Megaphone, Menu as MenuIcon, MonitorSmartphone, QrCode, Settings, Users, X } from "lucide-react";
+import { Gift, ChefHat, LayoutList, LogOut, Megaphone, Menu as MenuIcon, MonitorSmartphone, QrCode, Settings, Users, X } from "lucide-react";
 import { useAuthStore } from "../../stores/authStore";
 import { useStaffProfile } from "./adminData";
 import { fr } from "../../i18n/fr";
@@ -22,6 +22,7 @@ export default function AdminLayout() {
     { to: "/admin/tables", label: fr.admin.nav.tables, icon: QrCode, show: true },
     { to: "/admin/equipe", label: fr.admin.nav.team, icon: Users, show: isOwner },
     { to: "/admin/nouveautes", label: fr.admin.nav.news, icon: Megaphone, show: true },
+    { to: "/admin/fidelite", label: "Fidélité", icon: Gift, show: isOwner },
     { to: "/admin/reglages", label: fr.admin.nav.settings, icon: Settings, show: isOwner },
   ].filter((l) => l.show);
 

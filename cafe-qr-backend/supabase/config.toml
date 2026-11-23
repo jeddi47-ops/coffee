@@ -84,3 +84,6 @@ verify_jwt = false
 
 [functions.renew-access-key]
 verify_jwt = true
+
+[functions.loyalty-reminders]
+verify_jwt = false

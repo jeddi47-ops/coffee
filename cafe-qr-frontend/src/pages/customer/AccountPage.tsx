@@ -1,3 +1,4 @@
+import { CustomerLoyalty } from "../Loyalty";
 // /compte : espace client (cafés suivis, emails, déconnexion, suppression du compte).
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { Navigate } from "react-router-dom";
@@ -111,6 +112,7 @@ export default function AccountPage() {
 
       {!deleted && session && profile?.kind === "customer" && (
         <>
+          <CustomerLoyalty />
           <Card>
             <h2 className="text-lg font-semibold">{fr.account.followed}</h2>
             {error && <p role="alert" className="mt-2 text-sm font-semibold text-danger">{error}</p>}

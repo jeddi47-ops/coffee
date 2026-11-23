@@ -1,3 +1,4 @@
+import { StaffLoyalty } from "../Loyalty";
 // /staff : écran de service en temps réel (commandes, appels, tables, ruptures).
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
@@ -22,7 +23,7 @@ import { TablesView } from "./TablesView";
 import { AvailabilityList } from "./AvailabilityList";
 import { reloadAll, reloadCalls, reloadOrder, reloadTables, useStaffData } from "./useStaffData";
 
-type Tab = "orders" | "calls" | "tables" | "stock";
+type Tab = "orders" | "calls" | "tables" | "stock" | "loyalty";
 
 export default function StaffPage() {
   const profile = useAuthStore((s) => s.profile);
@@ -149,6 +150,7 @@ export default function StaffPage() {
     { id: "calls", label: fr.staff.tabs.calls, count: calls.length },
     { id: "tables", label: fr.staff.tabs.tables },
     { id: "stock", label: fr.staff.tabs.stock },
+    { id: "loyalty", label: "Fidélité" },
   ];
 
   return (
@@ -208,7 +210,7 @@ export default function StaffPage() {
       )}
 
       <main className="p-3 pb-10">
-        {!st.loaded ? (
+        {tab === "loyalty" ? <StaffLoyalty /> : !st.loaded ? (
           <ListSkeleton rows={4} />
         ) : tab === "orders" ? (
           <div className="grid gap-4 md:grid-cols-2">

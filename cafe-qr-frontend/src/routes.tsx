@@ -19,6 +19,7 @@ const MenuAdminPage = lazy(() => import("./pages/admin/MenuAdminPage"));
 const TablesAdminPage = lazy(() => import("./pages/admin/TablesAdminPage"));
 const StaffAdminPage = lazy(() => import("./pages/admin/StaffAdminPage"));
 const AnnouncementsPage = lazy(() => import("./pages/admin/AnnouncementsPage"));
+const LoyaltyAdmin = lazy(() => import("./pages/Loyalty"));
 const SettingsPage = lazy(() => import("./pages/admin/SettingsPage"));
 const PlatformAdminPage = lazy(() => import("./pages/admin/PlatformAdminPage"));
 
@@ -59,6 +60,7 @@ export const routes: RouteObject[] = [
         ),
       },
       { path: "nouveautes", element: <AnnouncementsPage /> },
+      { path: "fidelite", element: <RequireStaff roles={["owner"]}><LoyaltyAdmin /></RequireStaff> },
       {
         path: "reglages",
         element: (

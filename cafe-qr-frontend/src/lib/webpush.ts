@@ -46,7 +46,7 @@ function sameKey(sub: PushSubscription): boolean {
   return a.length === b.length && a.every((v, i) => v === b[i]);
 }
 
-async function subscribeAndRegister(): Promise<void> {
+async function subscribeAndRegister(customer = false): Promise<void> {
   const reg = await serviceWorkerReady();
   let sub = await reg.pushManager.getSubscription();
   // Clé VAPID changée : l'ancien abonnement ne marcherait plus.
@@ -65,7 +65,7 @@ async function subscribeAndRegister(): Promise<void> {
   const auth = json.keys?.auth;
   if (!json.endpoint || !p256dh || !auth) throw new Error("Abonnement push incomplet");
 
-  const { error } = await supabase.rpc("staff_register_push", {
+  const { error } = await supabase.rpc(customer ? "loyalty_register_push" : "staff_register_push", {
     p_endpoint: json.endpoint,
     p_p256dh: p256dh,
     p_auth_key: auth,
@@ -75,14 +75,14 @@ async function subscribeAndRegister(): Promise<void> {
 }
 
 /** À appeler depuis un toucher de l'utilisateur (obligatoire pour demander l'autorisation). */
-export async function enablePush(): Promise<PushState> {
+export async function enablePush(customer = false): Promise<PushState> {
   const state = getPushState();
   if (state !== "default" && state !== "granted") return state;
   if (state === "default") {
     const permission = await Notification.requestPermission();
     if (permission !== "granted") return permission === "denied" ? "denied" : "default";
   }
-  await subscribeAndRegister();
+  await subscribeAndRegister(customer);
   return "granted";
 }
 

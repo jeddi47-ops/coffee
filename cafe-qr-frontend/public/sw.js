@@ -38,7 +38,7 @@ self.addEventListener("notificationclick", (event) => {
     (async () => {
       const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
       for (const client of windows) {
-        if (new URL(client.url).pathname.startsWith("/staff") && "focus" in client) {
+        if (new URL(client.url).pathname === new URL(url, self.location.origin).pathname && "focus" in client) {
           return client.focus();
         }
       }
