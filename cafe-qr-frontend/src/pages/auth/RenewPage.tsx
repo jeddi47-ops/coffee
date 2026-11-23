@@ -28,8 +28,20 @@ export default function RenewPage() {
   async function submit(e: FormEvent) {
     e.preventDefault(); setBusy(true); setError(""); setSuccess("");
     try {
-      const { data, error } = await supabase.functions.invoke("renew-access-key", { body: { access_key: key } });
-      if (error || !data?.success) throw new Error(data?.message ?? "Clé invalide ou déjà utilisée.");
+      const code = key.replace(/[\s\u200b\ufeff]/gu, "").replace(/[‐‑‒–—−]/gu, "-").toUpperCase();
+      if (!/^CAFE-[MA](?:-[0-9A-F]{8}){4}$/.test(code)) {
+        throw new Error("Copiez la clé complète, du préfixe CAFE- jusqu’au dernier caractère.");
+      }
+      const { data, error } = await supabase.functions.invoke("renew-access-key", { body: { access_key: code } });
+      if (error || !data?.success) {
+        const response = error?.context;
+        if (response instanceof Response) {
+          if (response.status === 429) throw new Error("Trop de tentatives. Patientez une heure avant de réessayer.");
+          const body = await response.json().catch(() => null);
+          if (typeof body?.error?.message === "string") throw new Error(body.error.message);
+        }
+        throw new Error("Le renouvellement a échoué. Vérifiez votre connexion et réessayez.");
+      }
       await refreshCafe();
       setKey("");
       setSuccess(`Accès renouvelé jusqu’au ${new Date(data.access_until).toLocaleDateString("fr-FR")}.`);
