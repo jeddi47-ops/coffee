@@ -1,3 +1,4 @@
+import { Coffee, Home, CreditCard, UserRound } from "lucide-react";
 import { CustomerLoyalty } from "../Loyalty";
 // /compte : espace client (cafés suivis, emails, déconnexion, suppression du compte).
 import { useCallback, useEffect, useState, type FormEvent } from "react";
@@ -50,6 +51,7 @@ function SignInForm() {
 }
 
 export default function AccountPage() {
+  const [view, setView] = useState<"Accueil" | "Cartes" | "Compte">("Cartes");
   const ready = useAuthReady();
   const session = useAuthStore((s) => s.session);
   const profile = useAuthStore((s) => s.profile);
@@ -103,8 +105,8 @@ export default function AccountPage() {
   };
 
   return (
-    <main className="mx-auto max-w-lg space-y-6 px-4 py-8">
-      <h1 className="text-2xl font-bold">{fr.account.title}</h1>
+    <main className="min-h-screen bg-[#fbf5eb] text-[#261b16]"><header className="bg-[#211815] px-6 py-4 text-2xl font-bold text-white"><div className="mx-auto flex max-w-lg items-center gap-3"><Coffee className="text-[#ead09b]" /> Café QR</div></header><div className="mx-auto max-w-lg space-y-4 px-4 pb-28 pt-5">
+      <div className="flex items-center gap-3"><UserRound className="h-12 w-12 rounded-full bg-[#efdfbf] p-3" /><div><h1 className="text-2xl font-bold">{profile?.kind === "customer" ? ["Bonjour", session?.user.user_metadata?.display_name || session?.user.user_metadata?.full_name].filter(Boolean).join(", ") : fr.account.title}</h1><p className="text-sm text-muted">Votre espace client</p></div></div>
 
       {deleted && <p role="status" className="rounded-card bg-surface-2 p-4">{fr.account.deleted}</p>}
 
@@ -112,7 +114,8 @@ export default function AccountPage() {
 
       {!deleted && session && profile?.kind === "customer" && (
         <>
-          <CustomerLoyalty />
+          {view === "Cartes" && <CustomerLoyalty />}
+          {view === "Accueil" && (
           <Card>
             <h2 className="text-lg font-semibold">{fr.account.followed}</h2>
             {error && <p role="alert" className="mt-2 text-sm font-semibold text-danger">{error}</p>}
@@ -140,8 +143,9 @@ export default function AccountPage() {
                 })}
               </ul>
             )}
-          </Card>
-
+          </Card>)}
+          {view === "Compte" && <>
+          {error && <p role="alert">{error}</p>}
           <Button variant="secondary" className="w-full" onClick={() => void signOut(null)}>{fr.account.logout}</Button>
 
           <Card>
@@ -155,9 +159,10 @@ export default function AccountPage() {
                 <Button variant="secondary" onClick={() => setDeleteStep(0)} disabled={busy}>{fr.common.cancel}</Button>
               </div>
             )}
-          </Card>
+          </Card></>}
+          <nav aria-label="Espace client" className="fixed inset-x-0 bottom-0 z-30 flex justify-center border-t bg-[#fffaf2] safe-bottom">{([{ label: "Accueil", Icon: Home }, { label: "Cartes", Icon: CreditCard }, { label: "Compte", Icon: UserRound }] as const).map(({label, Icon}) => <button key={label} aria-current={view === label ? "page" : undefined} className={`flex w-1/3 max-w-40 flex-col items-center gap-1 py-2 text-xs font-semibold ${view === label ? "text-[#986914]" : "text-stone-600"}`} onClick={() => { setView(label); setDeleteStep(0); window.scrollTo(0,0); }}><Icon size={20}/>{label}</button>)}</nav>
         </>
       )}
-    </main>
+    </div></main>
   );
 }
