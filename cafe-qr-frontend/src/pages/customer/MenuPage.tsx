@@ -19,6 +19,7 @@ import { TopBar, TOP_BAR_HEIGHT } from "./TopBar";
 import { SideMenu } from "./SideMenu";
 import { useTableState } from "./useTableState";
 import { useCountdown } from "./useCountdown";
+import { CallWaiterView } from "./CallWaiterView";
 
 // Chargé à la demande : seul FollowDialog a besoin de supabase-js côté client.
 const FollowDialog = lazy(() => import("./FollowDialog"));
@@ -118,7 +119,6 @@ export function MenuPage() {
     try {
       await publicApi.callWaiter(token);
       setCallOptimistic(true); // created: false = déjà ouvert -> même message, sans erreur
-      setToast(fr.table.callSent);
     } catch (e) {
       if (e instanceof ApiError && e.status === 429) startCallCooldown(e.retryAfter ?? 60);
       setToast(errorMessage(e));
@@ -160,6 +160,14 @@ export function MenuPage() {
               />
             </div>
           </section>
+        ) : view === "call" ? (
+          <CallWaiterView
+            tableLabel={fr.menu.tableLabel(menu.table.label)}
+            busy={callBusy}
+            waiting={waiterOpen || callOptimistic}
+            cooldown={callCooldown}
+            onCall={() => void callWaiter()}
+          />
         ) : (
           <MenuView
             menu={menu}
@@ -199,7 +207,11 @@ export function MenuPage() {
           window.scrollTo({ top: 0 });
           void table.refresh();
         }}
-        onCall={callWaiter}
+        onCall={() => {
+          setView("call");
+          window.scrollTo({ top: 0 });
+          void callWaiter();
+        }}
       />
 
       <SideMenu
@@ -233,3 +245,4 @@ export function MenuPage() {
     </ThemeScope>
   );
 }
+
