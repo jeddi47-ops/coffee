@@ -590,7 +590,7 @@ export default function LoyaltyAdmin() {
                 est envoyé par période d’absence, si le client accepte les
                 notifications.
               </p>
-              <Button disabled={busy}>Enregistrer</Button>
+              <Button type="submit" disabled={busy}>Enregistrer</Button>
             </form>
           </Card>
           <Card>
