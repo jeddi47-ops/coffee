@@ -151,103 +151,92 @@ function Balance({ card }: { card: LoyaltyCard }) {
 }
 export function CustomerLoyalty() {
   const [push, setPush] = useState("");
-  const [data, setData] = useState<{
-      token: string;
-      cards: LoyaltyCard[];
-    } | null>(null),
-    [error, setError] = useState("");
+  const [showQr, setShowQr] = useState(false);
+  const [activeCard, setActiveCard] = useState(0);
+  const [data, setData] = useState<{ token: string; cards: LoyaltyCard[] } | null>(null);
+  const [error, setError] = useState("");
   useEffect(() => {
     let active = true;
-    const load = () =>
-      rpc<{ token: string; cards: LoyaltyCard[] }>("loyalty_account")
-        .then((v) => {
-          if (active) {
-            setData(v);
-            setError("");
-          }
-        })
-        .catch((e) => {
-          if (active) setError(message(e));
-        });
+    const load = () => rpc<{ token: string; cards: LoyaltyCard[] }>("loyalty_account")
+      .then((value) => { if (active) { setData(value); setError(""); } })
+      .catch((e) => { if (active) setError(message(e)); });
     void load();
     window.addEventListener("focus", load);
     const timer = window.setInterval(() => {
       if (document.visibilityState === "visible") void load();
     }, 30000);
-    return () => {
-      active = false;
-      window.clearInterval(timer);
-      window.removeEventListener("focus", load);
-    };
+    return () => { active = false; window.clearInterval(timer); window.removeEventListener("focus", load); };
   }, []);
+  const current = data?.cards[activeCard];
+  const enableReminders = async () => {
+    try {
+      const status = await enablePush(true);
+      setPush(status === "granted" ? "Rappels activés sur cet appareil." :
+        status === "needs-install" ? "Ajoutez Café QR à l’écran d’accueil pour activer les notifications." :
+        status === "not-configured" ? "Les notifications ne sont pas encore configurées." :
+        "Autorisez les notifications dans les réglages du navigateur.");
+    } catch (e) { setError(message(e)); }
+  };
+  const disableReminders = async () => {
+    try {
+      const registration = await navigator.serviceWorker?.getRegistration();
+      const subscription = await registration?.pushManager.getSubscription();
+      if (subscription) {
+        await rpc("loyalty_unregister_push", { p_endpoint: subscription.endpoint });
+        setPush("Rappels désactivés sur cet appareil.");
+      }
+    } catch (e) { setError(message(e)); }
+  };
   return (
     <section className="space-y-5">
-      <header><p className="text-sm font-semibold uppercase tracking-widest text-accent">Votre fidélité</p><h2 className="mt-1 text-2xl font-extrabold">Mes cartes</h2><p className="mt-1 text-sm text-muted">Retrouvez vos tampons et récompenses dans chaque café.</p></header>
-      <Button
-        variant="secondary"
-        onClick={() =>
-          void enablePush(true)
-            .then((s) =>
-              setPush(
-                s === "granted"
-                  ? "Rappels activés sur cet appareil."
-                  : s === "needs-install"
-                    ? "Ajoutez Café QR à l’écran d’accueil pour activer les notifications."
-                    : s === "not-configured"
-                      ? "Les notifications ne sont pas encore configurées."
-                      : "Autorisez les notifications dans les réglages du navigateur.",
-              ),
-            )
-            .catch((e) => setError(message(e)))
-        }
-      >
-        Activer les rappels de fidélité
-      </Button>
-      <Button
-        variant="secondary"
-        onClick={() =>
-          void navigator.serviceWorker
-            ?.getRegistration()
-            .then((r) => r?.pushManager.getSubscription())
-            .then(async (s) => {
-              if (s) {
-                await rpc("loyalty_unregister_push", {
-                  p_endpoint: s.endpoint,
-                });
-                setPush("Rappels désactivés sur cet appareil.");
-              }
-            })
-            .catch((e) => setError(message(e)))
-        }
-      >
-        Désactiver les rappels
-      </Button>
-      {push && (
-        <p role="status" className="text-sm">
-          {push}
-        </p>
-      )}
-      {error && <p role="alert">{error}</p>}
+      <header>
+        <p className="text-sm font-semibold uppercase tracking-widest text-accent">Votre fidélité</p>
+        <h2 className="mt-1 text-2xl font-extrabold">Mes cartes</h2>
+        <p className="mt-1 text-sm text-muted">Vos tampons et récompenses, réunis au même endroit.</p>
+      </header>
+      {error && <p role="alert" className="text-sm text-danger">{error}</p>}
       {!data && !error && <ListSkeleton rows={2} />}
+      {data && data.cards.length === 0 && (
+        <Card className="py-8 text-center">
+          <p className="font-semibold">Aucune carte pour le moment</p>
+          <p className="mt-1 text-sm text-muted">Votre première carte apparaîtra après votre visite dans un café participant.</p>
+        </Card>
+      )}
+      {current && (
+        <>
+          <CardFace {...current} logo={publicAssetUrl(current.logo_path)} />
+          {data.cards.length > 1 && (
+            <div className="flex items-center justify-center gap-3">
+              <Button variant="ghost" aria-label="Carte précédente" onClick={() => setActiveCard((activeCard - 1 + data.cards.length) % data.cards.length)}>←</Button>
+              <span className="text-sm text-muted">{activeCard + 1} sur {data.cards.length} cartes</span>
+              <Button variant="ghost" aria-label="Carte suivante" onClick={() => setActiveCard((activeCard + 1) % data.cards.length)}>→</Button>
+            </div>
+          )}
+        </>
+      )}
       {data && (
         <>
-          <Card className="overflow-hidden border-0 bg-ink text-surface">
-            <div className="flex items-start justify-between"><div><p className="text-xs font-semibold uppercase tracking-widest text-accent">Votre QR personnel</p><h3 className="mt-1 text-lg font-bold">À présenter au serveur</h3><p className="mt-1 text-sm text-surface/70">Un seul QR pour toutes vos cartes.</p></div><span className="rounded-full bg-surface/10 px-3 py-1 text-xs">Café QR</span></div>
-            <img
-              className="mx-auto mt-3 w-48 rounded-2xl bg-white p-3"
-              src={svgDataUrl(qrSvg("CAFEQR:" + data.token, "Mon compte"))}
-              alt="Mon QR de fidélité"
-            />
-          </Card>
-          {data.cards.length === 0 && (
-            <p className="text-muted">
-              Votre première carte apparaîtra après un scan dans un café
-              participant.
-            </p>
+          <Button className="w-full" onClick={() => setShowQr(true)}>Afficher mon QR personnel</Button>
+          {showQr && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true" aria-labelledby="loyalty-qr-title">
+              <Card className="w-full max-w-sm text-center">
+                <h3 id="loyalty-qr-title" className="text-xl font-bold">Votre QR personnel</h3>
+                <p className="mt-1 text-sm text-muted">Présentez-le au serveur pour ajouter un tampon.</p>
+                <img className="mx-auto mt-4 w-56 rounded-2xl bg-white p-3" src={svgDataUrl(qrSvg("CAFEQR:" + data.token, "Mon compte"))} alt="Mon QR de fidélité" />
+                <Button className="mt-4 w-full" onClick={() => setShowQr(false)}>Fermer</Button>
+              </Card>
+            </div>
           )}
-          {data.cards.map((c) => (
-            <CardFace key={c.id} {...c} logo={publicAssetUrl(c.logo_path)} />
-          ))}
+          <Card>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div><h3 className="font-semibold">Rappels de fidélité</h3><p className="text-sm text-muted">Recevez un rappel quand une récompense approche.</p></div>
+              <div className="flex gap-2">
+                <Button variant="secondary" onClick={() => void enableReminders()}>Activer</Button>
+                <Button variant="ghost" onClick={() => void disableReminders()}>Désactiver</Button>
+              </div>
+            </div>
+            {push && <p role="status" className="mt-3 text-sm text-muted">{push}</p>}
+          </Card>
         </>
       )}
     </section>
