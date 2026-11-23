@@ -9,14 +9,17 @@ const SLOW_MS = 15000;
 
 export function useTableState(token: string) {
   const [state, setState] = useState<TableState | null>(null);
+  const [readStartedAt, setReadStartedAt] = useState(0);
   const [failed, setFailed] = useState(false);
   const inFlight = useRef(false);
 
   const refresh = useCallback(async () => {
     if (inFlight.current) return;
     inFlight.current = true;
+    const startedAt = performance.now();
     try {
       setState(await publicApi.getTableState(token));
+      setReadStartedAt(startedAt);
       setFailed(false);
     } catch {
       setFailed(true); // pas de réessai en boucle : le prochain cycle de polling réessaie
@@ -65,5 +68,5 @@ export function useTableState(token: string) {
     setState((s) => (s ? { ...s, total_cents: totalCents } : s));
   }, []);
 
-  return { state, failed, refresh, applyServerTotal };
+  return { state, readStartedAt, failed, refresh, applyServerTotal };
 }

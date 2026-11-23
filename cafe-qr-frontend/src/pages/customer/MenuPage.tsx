@@ -40,7 +40,9 @@ export function MenuPage() {
   const [toast, setToast] = useState<string | null>(null);
   const [callBusy, setCallBusy] = useState(false);
   const [callCooldown, startCallCooldown] = useCountdown();
-  const [callOptimistic, setCallOptimistic] = useState(false);
+  const [sentAt, setSentAt] = useState<number | null>(null);
+  const [handled, setHandled] = useState(false);
+  const previousOpen = useRef(false);
 
   const lines = useCartStore((s) => s.linesByToken[token] ?? NO_LINES);
   const addToCart = useCartStore((s) => s.add);
@@ -80,9 +82,15 @@ export function MenuPage() {
 
   const cartQty = useMemo(() => Object.fromEntries(lines.map((l) => [l.productId, l.quantity])), [lines]);
   const waiterOpen = Boolean(table.state?.waiter_call);
+  const callOptimistic = sentAt !== null && table.readStartedAt <= sentAt;
   useEffect(() => {
-    if (table.state && !table.state.waiter_call) setCallOptimistic(false);
-  }, [table.state]);
+    if (waiterOpen) setHandled(false);
+    else if (!callOptimistic && (previousOpen.current || sentAt !== null)) {
+      setHandled(true);
+      setSentAt(null);
+    }
+    previousOpen.current = waiterOpen;
+  }, [waiterOpen, sentAt, callOptimistic]);
 
   if (load.kind === "loading") return <MenuSkeleton />;
   if (load.kind === "error") {
@@ -118,7 +126,8 @@ export function MenuPage() {
     setCallBusy(true);
     try {
       await publicApi.callWaiter(token);
-      setCallOptimistic(true); // created: false = déjà ouvert -> même message, sans erreur
+      setSentAt(performance.now());
+      setHandled(false);
     } catch (e) {
       if (e instanceof ApiError && e.status === 429) startCallCooldown(e.retryAfter ?? 60);
       setToast(errorMessage(e));
@@ -164,6 +173,7 @@ export function MenuPage() {
           <CallWaiterView
             tableLabel={fr.menu.tableLabel(menu.table.label)}
             busy={callBusy}
+            handled={handled}
             waiting={waiterOpen || callOptimistic}
             cooldown={callCooldown}
             onCall={() => void callWaiter()}
@@ -210,7 +220,7 @@ export function MenuPage() {
         onCall={() => {
           setView("call");
           window.scrollTo({ top: 0 });
-          void callWaiter();
+          if (view !== "call" && !handled) void callWaiter();
         }}
       />
 
@@ -245,4 +255,3 @@ export function MenuPage() {
     </ThemeScope>
   );
 }
-
