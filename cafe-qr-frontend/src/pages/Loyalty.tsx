@@ -315,10 +315,16 @@ export function StaffLoyalty() {
           maxScansPerSecond: 3,
         },
       );
-      await scanner.current.start();
+      // Show the video before requesting playback; display:none prevents some mobile browsers
+      // from attaching camera frames even though getUserMedia reports an open camera.
       setRunning(true);
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => resolve()),
+      );
+      await scanner.current.start();
     } catch {
       scanner.current?.destroy();
+      setRunning(false);
       setError(
         "Caméra inaccessible. Autorisez la caméra dans votre navigateur puis réessayez.",
       );
@@ -334,7 +340,11 @@ export function StaffLoyalty() {
       </p>
       <video
         ref={video}
-        className={running ? "w-full rounded-2xl" : "hidden"}
+        className={
+          running || busy
+            ? "block min-h-64 w-full rounded-2xl bg-black object-cover"
+            : "hidden"
+        }
         muted
         playsInline
       />
@@ -346,6 +356,7 @@ export function StaffLoyalty() {
       <Button disabled={busy} onClick={() => void start()}>
         {running ? "Recommencer le scan" : "Scanner un client"}
       </Button>
+      {busy && !running && <p role="status">Activation de la caméra…</p>}
       {running && (
         <Button
           variant="secondary"
@@ -686,3 +697,4 @@ export default function LoyaltyAdmin() {
     </div>
   );
 }
+
