@@ -55,7 +55,7 @@ export default function RegisterPage() {
       </header>
       <div className="mx-auto grid max-w-6xl overflow-hidden px-5 pb-10 sm:px-8 lg:grid-cols-[.9fr_1.1fr] lg:gap-10 lg:pt-6">
         <aside className="relative hidden min-h-[34rem] overflow-hidden rounded-[2rem] bg-[#19392c] lg:block">
-          <img src="/terrasse-cafe.jpg" alt="Le menu du café accessible depuis la table" className="absolute inset-0 h-full w-full object-cover" />
+          <img src="/espresso-marbre.jpg" alt="Une tasse en porcelaine sur un comptoir en marbre vert" className="absolute inset-0 h-full w-full object-cover" />
           <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 to-transparent px-8 pb-9 pt-28 text-white">
             <p className="max-w-xs font-serif text-5xl leading-tight">À chaque table, son menu.</p>
           </div>
