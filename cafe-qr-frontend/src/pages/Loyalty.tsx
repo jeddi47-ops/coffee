@@ -181,8 +181,8 @@ export function CustomerLoyalty() {
     };
   }, []);
   return (
-    <section className="space-y-4">
-      <h2 className="text-xl font-bold">Mes cartes de fidélité</h2>
+    <section className="space-y-5">
+      <header><p className="text-sm font-semibold uppercase tracking-widest text-accent">Votre fidélité</p><h2 className="mt-1 text-2xl font-extrabold">Mes cartes</h2><p className="mt-1 text-sm text-muted">Retrouvez vos tampons et récompenses dans chaque café.</p></header>
       <Button
         variant="secondary"
         onClick={() =>
@@ -231,14 +231,10 @@ export function CustomerLoyalty() {
       {!data && !error && <ListSkeleton rows={2} />}
       {data && (
         <>
-          <Card>
-            <h3 className="font-bold">Mon QR personnel</h3>
-            <p className="mt-1 text-sm text-muted">
-              Un seul QR pour vos cartes. Présentez-le au serveur lors de votre
-              visite.
-            </p>
+          <Card className="overflow-hidden border-0 bg-ink text-surface">
+            <div className="flex items-start justify-between"><div><p className="text-xs font-semibold uppercase tracking-widest text-accent">Votre QR personnel</p><h3 className="mt-1 text-lg font-bold">À présenter au serveur</h3><p className="mt-1 text-sm text-surface/70">Un seul QR pour toutes vos cartes.</p></div><span className="rounded-full bg-surface/10 px-3 py-1 text-xs">Café QR</span></div>
             <img
-              className="mx-auto w-56"
+              className="mx-auto mt-3 w-48 rounded-2xl bg-white p-3"
               src={svgDataUrl(qrSvg("CAFEQR:" + data.token, "Mon compte"))}
               alt="Mon QR de fidélité"
             />
