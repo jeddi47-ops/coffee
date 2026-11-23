@@ -1,3 +1,4 @@
+import { Coffee, Croissant, Pizza, Leaf, CakeSlice, Utensils } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { enablePush } from "../lib/webpush";
 import type QrScanner from "qr-scanner";
@@ -63,6 +64,30 @@ type OwnerCard = LoyaltyCard & {
 };
 const message = (e: unknown) =>
   e instanceof Error ? e.message : "Une erreur est survenue.";
+const cardDesigns = [
+  { name: "Café espresso", color: "#b9842d", ink: "#fff5db", background: "radial-gradient(ellipse at 100% 0%, #825131, transparent 62%), #271a15", Icon: Coffee },
+  { name: "Table bistro", color: "#831c37", ink: "#541629", background: "linear-gradient(135deg, #f4dfe3 12%, #fff6ec 12% 82%, #e9bac4 82%)", Icon: Utensils },
+  { name: "Pizzeria", color: "#e7ab36", ink: "#ffe3a6", background: "repeating-linear-gradient(135deg, #272722 0 12px, #2e2e28 12px 14px)", Icon: Pizza },
+  { name: "Boulangerie", color: "#935423", ink: "#523017", background: "repeating-linear-gradient(90deg, #f9ebd0 0 22px, #f3e1bd 22px 44px)", Icon: Croissant },
+  { name: "Bar végétal", color: "#317553", ink: "#e2f7cf", background: "radial-gradient(ellipse at bottom right, #397550 0 30%, #225742 31% 55%, #123e32 56%)", Icon: Leaf },
+  { name: "Pâtisserie", color: "#982956", ink: "#fff0f5", background: "radial-gradient(circle at 90% 0%, #aa466d 0 22%, transparent 23%), linear-gradient(120deg, #552039, #84284e)", Icon: CakeSlice },
+];
+function designFor(color: string) {
+  return cardDesigns.find((design) => design.color === color.toLowerCase()) ??
+    { name: "Modèle actuel", color, ink: "#ffffff", background: `linear-gradient(120deg, #211d19 35%, ${color})`, Icon: Coffee };
+}
+function CardFace({ color, name, logo, small = false }: {
+  color: string; name: string; logo?: string | null; small?: boolean;
+}) {
+  const { Icon, ink, background } = designFor(color);
+  return <div style={{ background, color: ink }} className="relative isolate overflow-hidden rounded-xl p-5 text-left">
+    <Icon aria-hidden="true" className="pointer-events-none absolute -right-4 -top-3 -z-10 h-28 w-28 rotate-12 opacity-15" />
+    {logo ? <img src={logo} alt="" className="mb-3 h-9 w-9 rounded-full object-cover" /> : <Icon aria-hidden="true" className="mb-3 h-8 w-8" />}
+    <p className="text-xs uppercase tracking-widest">Carte de fidélité</p>
+    <p className="break-words text-xl font-bold">{name}</p>
+    {small && <div aria-hidden="true" className="mt-3 flex gap-1">{Array.from({length: 5}, (_, i) => <span key={i} className="h-3 w-3 rounded-full border border-current" />)}</div>}
+  </div>;
+}
 function Balance({ card }: { card: LoyaltyCard }) {
   const progress = Math.min(card.stamps, card.target);
   return (
@@ -205,19 +230,7 @@ export function CustomerLoyalty() {
           )}
           {data.cards.map((c) => (
             <Card key={c.id}>
-              <div
-                className="mb-4 flex items-center gap-3 border-b pb-3"
-                style={{ borderColor: c.color }}
-              >
-                {publicAssetUrl(c.logo_path) && (
-                  <img
-                    src={publicAssetUrl(c.logo_path)!}
-                    alt=""
-                    className="h-12 w-12 rounded-full object-cover"
-                  />
-                )}
-                <h3 className="text-lg font-bold">{c.name}</h3>
-              </div>
+              <div className="mb-4"><CardFace color={c.color} name={c.name} logo={publicAssetUrl(c.logo_path)} /></div>
               <Balance card={c} />
               {!c.enabled && (
                 <p className="mt-2 text-sm">
@@ -568,16 +581,20 @@ export default function LoyaltyAdmin() {
                   </Field>
                 ))}
               </div>
-              <Field label="Couleur de la carte" htmlFor="loyalty-color">
-                <Input
-                  id="loyalty-color"
-                  type="color"
-                  value={program.color}
-                  onChange={(e) =>
-                    setProgram({ ...program, color: e.target.value })
-                  }
-                />
-              </Field>
+              <fieldset>
+                <legend className="mb-3 font-semibold">Modèle de carte</legend>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {(cardDesigns.some((d) => d.color === program.color.toLowerCase()) ? cardDesigns : [designFor(program.color), ...cardDesigns]).map((d) => (
+                    <label key={d.color} className="cursor-pointer">
+                      <CardFace color={d.color} name={cafe.name} small logo={publicAssetUrl(program.logo_path)} />
+                      <span className="mt-2 flex items-center gap-2 font-semibold">
+                        <input type="radio" name="card-design" checked={program.color.toLowerCase() === d.color.toLowerCase()} onChange={() => setProgram({ ...program, color: d.color })} />
+                        {d.name}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
               <Field
                 label="Logo de la carte (facultatif)"
                 htmlFor="loyalty-logo"
