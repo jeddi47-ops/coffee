@@ -7,6 +7,7 @@ export function Switch({
   description,
   disabled,
   id,
+  tone = "default",
 }: {
   checked: boolean;
   onChange: (value: boolean) => void;
@@ -14,6 +15,7 @@ export function Switch({
   description?: string;
   disabled?: boolean;
   id?: string;
+  tone?: "default" | "gold";
 }) {
   return (
     <label className={cn("flex min-h-[44px] cursor-pointer items-center justify-between gap-4", disabled && "opacity-60")}>
@@ -31,16 +33,17 @@ export function Switch({
         onClick={() => onChange(!checked)}
         className={cn(
           "relative h-7 w-12 shrink-0 rounded-full border border-line transition-colors",
-          checked ? "bg-accent" : "bg-surface-2",
+          checked ? (tone === "gold" ? "bg-gradient-to-r from-[#dfb75e] to-[#b9842d]" : "bg-accent") : "bg-surface-2",
         )}
       >
         <span
           className={cn(
             "absolute left-1 top-0.5 h-5 w-5 rounded-full transition-transform",
-            checked ? "translate-x-5 bg-accent-fg" : "translate-x-0 bg-muted",
+            checked ? (tone === "gold" ? "translate-x-5 bg-white" : "translate-x-5 bg-accent-fg") : "translate-x-0 bg-muted",
           )}
         />
       </button>
     </label>
   );
 }
+

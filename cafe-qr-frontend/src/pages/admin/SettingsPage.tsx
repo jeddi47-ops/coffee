@@ -1,6 +1,6 @@
 // /admin/reglages (owner uniquement) : service, identité du café, réglages avancés, apparence.
 import { useEffect, useState, type FormEvent } from "react";
-import { ImagePlus } from "lucide-react";
+import { ImagePlus, Settings2, Store } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 import { publicAssetUrl } from "../../lib/env";
 import { errorMessage } from "../../lib/errors";
@@ -106,13 +106,15 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">{fr.admin.settingsTitle}</h1>
+      <header><h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl">{fr.admin.settingsTitle}</h1><p className="mt-2 text-base text-muted">Personnalisez l’expérience de votre café et les règles de service.</p></header>
       {error && <p role="alert" className="rounded-card bg-danger px-4 py-3 text-sm font-semibold text-danger-fg">{error}</p>}
-      {info && <p role="status" className="rounded-card bg-surface-2 px-4 py-3 text-sm font-semibold">{info}</p>}
+      {info && <p role="status" className="rounded-2xl border border-[#28764c]/20 bg-[#e7f3eb] px-4 py-3 text-sm font-semibold text-[#1f6b3e]">{info}</p>}
 
-      <Card className="space-y-2">
+      <Card className="space-y-3 rounded-3xl border-black/[0.06] p-5 shadow-[0_12px_35px_rgba(27,24,19,0.06)] sm:p-7">
+        <div className="mb-3 flex items-start gap-4"><span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#f5f2ed]"><Settings2 className="h-6 w-6" aria-hidden="true" /></span><div><h2 className="text-xl font-bold">Service</h2><p className="mt-1 text-sm text-muted">Contrôlez les commandes et les demandes d’assistance.</p></div></div>
         <div className={cafe.ordering_enabled ? "" : "rounded-card bg-warn-soft p-3"}>
           <Switch
+            tone="gold"
             checked={!cafe.ordering_enabled}
             disabled={busy}
             onChange={(paused) => void update({ ordering_enabled: !paused })}
@@ -121,6 +123,7 @@ export default function SettingsPage() {
           />
         </div>
         <Switch
+          tone="gold"
           checked={cafe.call_waiter_enabled}
           disabled={busy}
           onChange={(v) => void update({ call_waiter_enabled: v })}
@@ -129,7 +132,8 @@ export default function SettingsPage() {
         />
       </Card>
 
-      <Card>
+      <Card className="rounded-3xl border-black/[0.06] p-5 shadow-[0_12px_35px_rgba(27,24,19,0.06)] sm:p-7">
+        <div className="mb-5 flex items-start gap-4"><span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#f5f2ed]"><Store className="h-6 w-6" aria-hidden="true" /></span><div><h2 className="text-xl font-bold">Identité du café</h2><p className="mt-1 text-sm text-muted">Nom, logo et devise visibles dans votre espace client.</p></div></div>
         <form onSubmit={submit} className="space-y-4" noValidate>
           <Field label={fr.admin.cafeName} htmlFor="cafe-name">
             <Input id="cafe-name" maxLength={120} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
@@ -143,7 +147,7 @@ export default function SettingsPage() {
               ) : (
                 <span aria-hidden="true" className="flex h-16 w-16 items-center justify-center rounded-full bg-surface-2 text-lg font-bold">{initials(cafe.name)}</span>
               )}
-              <label className="inline-flex min-h-[44px] cursor-pointer items-center gap-2 rounded-card border border-line bg-surface px-4 text-sm font-semibold hover:bg-surface-2">
+              <label className="inline-flex min-h-[44px] cursor-pointer items-center gap-2 rounded-2xl border border-line bg-white px-4 text-sm font-semibold hover:bg-surface-2">
                 <ImagePlus className="h-4 w-4" aria-hidden="true" />
                 {fr.admin.photoChoose}
                 <input type="file" accept={ACCEPTED_IMAGE_TYPES.join(",")} className="sr-only" disabled={busy} onChange={(e) => { const f = e.target.files?.[0]; if (f) void uploadLogo(f); }} />
@@ -156,7 +160,7 @@ export default function SettingsPage() {
             <Input id="currency" maxLength={3} value={form.currency} onChange={(e) => setForm({ ...form, currency: e.target.value.toUpperCase() })} className="w-28 uppercase" />
           </Field>
 
-          <details className="rounded-card border border-line p-4">
+          <details className="rounded-2xl border border-line bg-[#faf9f7] p-4">
             <summary className="min-h-[44px] cursor-pointer py-2 font-semibold">{fr.admin.advanced}</summary>
             <div className="mt-3 space-y-4">
               <Field label={fr.admin.rateLimit} htmlFor="order_rate_limit" hint={fr.admin.rateLimitHint} error={rangeError("order_rate_limit")}>
@@ -171,7 +175,7 @@ export default function SettingsPage() {
             </div>
           </details>
 
-          <Button type="submit" disabled={busy || !formValid}>{busy ? fr.common.saving : fr.common.save}</Button>
+          <Button type="submit" className="rounded-2xl bg-gradient-to-r from-[#dfb75e] to-[#b9842d] px-6 text-[#21180b] shadow-sm hover:opacity-90" disabled={busy || !formValid}>{busy ? fr.common.saving : fr.common.save}</Button>
         </form>
       </Card>
 
@@ -179,3 +183,4 @@ export default function SettingsPage() {
     </div>
   );
 }
+
