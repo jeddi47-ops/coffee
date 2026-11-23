@@ -45,9 +45,9 @@ type Program = {
   reward: string;
   color: string;
   logo_path: string | null;
-  target: number;
-  cooldown_minutes: number;
-  reminder_days: number;
+  target: number | "";
+  cooldown_minutes: number | "";
+  reminder_days: number | "";
 };
 type Event = {
   kind: string;
@@ -464,14 +464,28 @@ export default function LoyaltyAdmin() {
               onSubmit={(e) => {
                 e.preventDefault();
                 void run(async () => {
+                  const numericValues = [
+                    program.target,
+                    program.cooldown_minutes,
+                    program.reminder_days,
+                  ];
+                  if (numericValues.some((value) => value === "")) {
+                    throw new Error("Renseignez tous les champs numériques.");
+                  }
+                  const payload = {
+                    ...program,
+                    target: Number(program.target),
+                    cooldown_minutes: Number(program.cooldown_minutes),
+                    reminder_days: Number(program.reminder_days),
+                  };
                   const r = await supabase
                     .from("loyalty_programs")
-                    .upsert(program)
+                    .upsert(payload)
                     .select()
                     .single();
                   if (r.error)
-                    throw new Error("Vérifiez les réglages du programme.");
-                  setProgram(r.data);
+                    throw new Error(r.error.message || "Vérifiez les réglages du programme.");
+                  setProgram(r.data as Program);
                   setInfo("Programme enregistré.");
                 });
               }}
@@ -547,7 +561,7 @@ export default function LoyaltyAdmin() {
                       onChange={(e) =>
                         setProgram({
                           ...program,
-                          [f.key]: Number(e.target.value),
+                          [f.key]: e.target.value === "" ? "" : Number(e.target.value),
                         })
                       }
                     />
@@ -697,4 +711,3 @@ export default function LoyaltyAdmin() {
     </div>
   );
 }
-
