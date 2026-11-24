@@ -1,6 +1,8 @@
-import { MetricsSkeleton } from "../../components/Skeletons";
+import { useAuthReady } from "../../components/RequireAuth";
+import { useAuthStore } from "../../stores/authStore";
+import { FullPageLoader, MetricsSkeleton } from "../../components/Skeletons";
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
 import { Input } from "../../components/ui/input";
@@ -25,6 +27,15 @@ const money = (amount: number) =>
   new Intl.NumberFormat("fr-FR", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(amount);
 
 export default function PlatformAdminPage() {
+  const ready = useAuthReady();
+  const session = useAuthStore(state => state.session);
+  if (!ready) return <FullPageLoader />;
+  if (!session) return <Navigate to="/login" replace />;
+  return <VerifiedDashboard key={session.user.id} />;
+}
+
+function VerifiedDashboard() {
+  const [denied, setDenied] = useState(false);
   const [month, setMonth] = useState(currentMonth);
   const [dashboard, setDashboard] = useState<Dashboard | null>(null);
   const [plan, setPlan] = useState<Plan>("monthly");
@@ -40,8 +51,12 @@ export default function PlatformAdminPage() {
     const { data, error: invokeError } = await supabase.functions.invoke("platform-dashboard", { body: { month } });
     if (invokeError) {
       setDashboard(null);
+      setBatch(null);
+      const status = invokeError.context?.status;
+      setDenied(status === 401 || status === 403);
       setError(fr.platformAdmin.error);
     } else {
+      setDenied(false);
       setDashboard(data as Dashboard);
     }
     setLoading(false);
@@ -90,6 +105,15 @@ export default function PlatformAdminPage() {
     }
     setBusy(false);
   };
+
+  if (denied) return <Navigate to="/" replace />;
+  if (!dashboard) {
+    if (loading) return <FullPageLoader />;
+    return <main className="mx-auto max-w-md space-y-4 p-6">
+      <p role="alert">Impossible de vérifier votre accès pour le moment.</p>
+      <Button onClick={() => void loadDashboard()}>Réessayer</Button>
+    </main>;
+  }
 
   return (
     <main className="min-h-screen bg-bg px-4 py-8 text-ink sm:px-6 lg:px-8">
