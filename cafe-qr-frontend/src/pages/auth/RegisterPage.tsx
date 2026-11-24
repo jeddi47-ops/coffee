@@ -4,7 +4,7 @@ import { supabase } from "../../lib/supabase";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Field } from "../../components/ui/label";
-import { ArrowRight, Coffee, KeyRound, MailCheck } from "lucide-react";
+import { ArrowRight, KeyRound, MailCheck } from "lucide-react";
 
 export default function RegisterPage() {
   const [cafe, setCafe] = useState("");
@@ -50,7 +50,7 @@ export default function RegisterPage() {
   return (
     <main className="min-h-screen bg-[#faf8f3] text-[#232920]">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-5 py-5 sm:px-8">
-        <Link to="/" className="flex items-center gap-2 text-xl font-bold"><Coffee aria-hidden="true" /> Café QR</Link>
+        <Link to="/" className="flex items-center gap-2 text-xl font-bold"><img src="/icons/cafe-qr-logo.png" alt="Café QR" width="64" height="64" className="rounded-lg" /></Link>
         <Link to="/login" className="rounded-full border border-stone-300 px-4 py-2 text-sm font-semibold">Se connecter</Link>
       </header>
       <div className="mx-auto grid max-w-6xl overflow-hidden px-5 pb-10 sm:px-8 lg:grid-cols-[.9fr_1.1fr] lg:gap-10 lg:pt-6">

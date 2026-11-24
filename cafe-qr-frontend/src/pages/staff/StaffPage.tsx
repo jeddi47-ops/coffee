@@ -2,7 +2,7 @@ import { StaffLoyalty } from "../Loyalty";
 // /staff : écran de service en temps réel (commandes, appels, tables, ruptures).
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Coffee, ConciergeBell, Grid2X2, ScanLine, MoreHorizontal, Bell, LogOut, Moon, Settings, Sun, Volume2, VolumeX } from "lucide-react";
+import { ConciergeBell, Grid2X2, ScanLine, MoreHorizontal, Bell, LogOut, Moon, Settings, Sun, Volume2, VolumeX } from "lucide-react";
 import { useAuthStore } from "../../stores/authStore";
 import { useStaffStore } from "../../stores/staffStore";
 import { staffRpc } from "../../lib/api";
@@ -161,7 +161,7 @@ export default function StaffPage() {
       <header className="sticky top-0 z-30 bg-[#211a13] text-white">
         <ConnectionBanner online={st.online} />
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-2">
-          <span className="flex items-center gap-2 text-xl font-bold text-[#ebc577]"><Coffee /> Café QR</span>
+          <span className="flex items-center gap-2 text-xl font-bold text-[#ebc577]"><img src="/icons/icon-192.png?v=2" alt="" width="36" height="36" className="rounded-lg" /> Café QR</span>
           <Button variant="ghost" size="icon" onClick={() => st.setSoundOn(!st.soundOn)} aria-label={fr.staff.sound} aria-pressed={st.soundOn}>{st.soundOn ? <Volume2/> : <VolumeX/>}</Button>
         </div>
       </header>

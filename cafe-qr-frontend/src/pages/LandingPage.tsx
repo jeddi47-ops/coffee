@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Coffee, ArrowUpRight, Check, Bell, Gift, Utensils } from "lucide-react";
+import { ArrowUpRight, Check, Bell, Gift, Utensils } from "lucide-react";
 
 const features = [
   { title: "Le menu à table", icon: Utensils, text: "Vos clients scannent le QR de leur table, consultent la carte et passent commande depuis leur téléphone." },
@@ -14,7 +14,7 @@ export default function LandingPage() {
   const steps = ["À table", "En salle", "Fidélité"];
   return <main className="min-h-screen bg-[#faf6ed] text-[#282118]">
     <header className="mx-auto flex max-w-6xl items-center justify-between border-b border-[#d5cbb9] px-5 py-4">
-      <span className="flex items-center gap-2 font-serif text-2xl font-bold"><Coffee/> Café QR</span>
+      <span className="flex items-center gap-2 font-serif text-2xl font-bold"><img src="/icons/cafe-qr-logo.png" alt="Café QR" width="64" height="64" className="rounded-lg" /></span>
       <nav className="flex items-center gap-5 font-semibold"><a className="hidden sm:block" href="#tarifs">Tarifs</a><Link to="/login">Se connecter ↗</Link></nav>
     </header>
     <section className="mx-auto grid max-w-6xl items-center gap-8 px-5 py-10 md:grid-cols-2 md:py-20">

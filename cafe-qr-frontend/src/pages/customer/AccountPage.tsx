@@ -1,4 +1,4 @@
-import { Coffee, Home, CreditCard, UserRound } from "lucide-react";
+import { Home, CreditCard, UserRound } from "lucide-react";
 import { CustomerLoyalty } from "../Loyalty";
 // /compte : espace client (cafés suivis, emails, déconnexion, suppression du compte).
 import { useCallback, useEffect, useState, type FormEvent } from "react";
@@ -105,7 +105,7 @@ export default function AccountPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#fbf5eb] text-[#261b16]"><header className="bg-[#211815] px-6 py-4 text-2xl font-bold text-white"><div className="mx-auto flex max-w-lg items-center gap-3"><Coffee className="text-[#ead09b]" /> Café QR</div></header><div className="mx-auto max-w-lg space-y-4 px-4 pb-28 pt-5">
+    <main className="min-h-screen bg-[#fbf5eb] text-[#261b16]"><header className="bg-[#211815] px-6 py-4 text-2xl font-bold text-white"><div className="mx-auto flex max-w-lg items-center gap-3"><img src="/icons/icon-192.png?v=2" alt="" width="36" height="36" className="rounded-lg" /> Café QR</div></header><div className="mx-auto max-w-lg space-y-4 px-4 pb-28 pt-5">
       <div className="flex items-center gap-3"><UserRound className="h-12 w-12 rounded-full bg-[#efdfbf] p-3" /><div><h1 className="text-2xl font-bold">{profile?.kind === "customer" ? ["Bonjour", session?.user.user_metadata?.display_name || session?.user.user_metadata?.full_name].filter(Boolean).join(", ") : fr.account.title}</h1><p className="text-sm text-muted">Votre espace client</p></div></div>
 
       {deleted && <p role="status" className="rounded-card bg-surface-2 p-4">{fr.account.deleted}</p>}
