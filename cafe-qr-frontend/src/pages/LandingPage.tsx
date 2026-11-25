@@ -1,11 +1,35 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowUpRight, Check, X, QrCode, Users, Megaphone, Bell, Gift, Utensils } from "lucide-react";
+import { ArrowUpRight, Check, X, ChevronDown, Gift } from "lucide-react";
 
-const features = [
-  { title: "Le menu à table", icon: Utensils, text: "Vos clients scannent le QR de leur table, consultent la carte et passent commande depuis leur téléphone." },
-  { title: "Le service en salle", icon: Bell, text: "Commandes et appels arrivent sur l’écran du serveur avec le numéro de table et le temps d’attente." },
-  { title: "La prochaine visite", icon: Gift, text: "Le serveur scanne le QR personnel du client. Un tampon s’ajoute à sa carte, selon la règle de votre café." },
+const featureGroups = [
+  {
+    title: "À table",
+    photo: "photo-1517248135467-4c7edcad34c4",
+    alt: "Tables dressées dans une salle de restaurant",
+    items: [
+      ["Menu et disponibilités", "Organisez vos plats par catégorie. Quand un produit est épuisé, signalez-le sur la carte que vos clients consultent depuis leur téléphone."],
+      ["QR par table", "Chaque table a son propre QR. Le client le scanne pour ouvrir votre menu et sa commande est associée à la bonne table."],
+    ],
+  },
+  {
+    title: "Pendant le service",
+    photo: "photo-1556911220-bff31c812dba",
+    alt: "Préparation d’un plat en cuisine",
+    items: [
+      ["Commandes et appels", "L’équipe retrouve les commandes sur son écran de service. Un client a besoin de quelqu’un ? Son appel indique à quelle table se rendre."],
+      ["Accès de l’équipe", "Créez un accès pour chaque serveur. Chacun se connecte à son espace pour suivre les demandes en salle."],
+    ],
+  },
+  {
+    title: "Après la visite",
+    photo: "photo-1541167760496-1628856ab772",
+    alt: "Café servi avec un motif de mousse de lait",
+    items: [
+      ["Carte de fidélité", "Choisissez un modèle de carte, votre règle et la récompense. Le serveur scanne le QR personnel du client pour ajouter un tampon sur la carte de votre établissement."],
+      ["Nouveautés et rappels", "Partagez vos nouveautés avec les clients qui vous suivent. Un client proche de sa récompense peut recevoir un rappel après une période d’absence s’il a accepté les notifications."],
+    ],
+  },
 ];
 const plans = [
   { id: "monthly", label: "Mensuel", price: 10, unit: "mois", duration: "1 mois" },
@@ -13,12 +37,6 @@ const plans = [
 ] as const;
 type Plan = typeof plans[number];
 const included = ["Menu numérique et QR par table", "Commandes et appels serveur", "Gestion de l’équipe et des ruptures", "Nouveautés et cartes de fidélité"];
-const operations = [
-  { Icon: Utensils, name: "Menu et ruptures", detail: "Modifiez les plats et indiquez les produits épuisés.", rows: ["Assiette de saison · Disponible", "Tarte du jour · Épuisée"] },
-  { Icon: QrCode, name: "Tables et QR", detail: "Associez chaque table à son QR pour retrouver l’origine d’une commande.", rows: ["Table 04 · Terrasse", "Table 08 · Salle"] },
-  { Icon: Users, name: "Équipe", detail: "Donnez à chaque membre de votre équipe son accès au service.", rows: ["Responsable", "Serveur"] },
-  { Icon: Megaphone, name: "Nouveautés", detail: "Annoncez votre prochain brunch ou un nouveau plat aux clients qui suivent votre établissement.", rows: ["Le brunch du dimanche", "Nouvelle carte de saison"] },
-];
 function Checkout({plan, close}: {plan: Plan; close: () => void}) {
   const dialog = useRef<HTMLDialogElement>(null);
   useEffect(() => {
@@ -34,9 +52,7 @@ function Checkout({plan, close}: {plan: Plan; close: () => void}) {
 const cta = "inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[#26201a] px-5 py-3 font-semibold text-white focus-visible:outline-offset-4";
 export default function LandingPage() {
   const [purchase, setPurchase] = useState<Plan | null>(null);
-  const [tool, setTool] = useState(0);
   const [paused, setPaused] = useState(false);
-  const selected = operations[tool];
   return <main className="min-h-screen bg-[#faf6ed] text-[#282118]">
     <header className="border-b border-[#d5cbb9] bg-[#fffdf8]">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-5 px-5 py-3 md:flex-nowrap md:px-10">
@@ -62,14 +78,42 @@ export default function LandingPage() {
         </div>
       </div>
     </section>
-    <section id="fonctionnalites" className="bg-[#203c30] text-[#fff8e8]"><div className="mx-auto grid max-w-6xl gap-7 px-5 py-10 md:grid-cols-3">{features.map(({title,icon:Icon,text})=><article key={title}><Icon className="mb-3 text-[#edd098]"/><h2 className="font-serif text-2xl">{title}</h2><p className="mt-2 max-w-sm leading-relaxed">{text}</p></article>)}</div></section>
-    <section className="mx-auto max-w-6xl px-5 pt-16"><h2 className="font-serif text-4xl">Dans les coulisses de votre établissement.</h2>
-      <div className="mt-7 grid overflow-hidden rounded-2xl border border-[#d5cbb9] md:grid-cols-2">
-        <div className="p-5 sm:p-8"><div className="flex flex-wrap gap-2">{operations.map(({name,Icon},i)=><button key={name} aria-pressed={tool===i} onClick={()=>setTool(i)} className={`flex items-center gap-2 rounded-full border px-3 py-2 text-sm ${tool===i?"bg-[#203c30] text-white":"bg-white"}`}><Icon size={16}/>{name}</button>)}</div>
-        <div aria-live="polite" className="mt-8"><h3 className="font-serif text-3xl">{selected.name}</h3><p className="mt-3 max-w-md">{selected.detail}</p></div></div>
-        <div className="flex items-end p-5 sm:p-8" style={{backgroundImage:"url(/services.jpg)",backgroundSize:"300% auto",backgroundPosition:["left center","center center","center center","right center"][tool]}}>
-          <div key={tool} className="w-full rounded-xl bg-white p-4 shadow-xl motion-safe:animate-[appear_.35s_ease-out]"><selected.Icon className="mb-2 text-[#986629]"/>{selected.rows.map(row=><p className="border-t py-2 font-medium" key={row}>{row}</p>)}</div></div>
-      </div></section>
+    <section id="fonctionnalites" aria-labelledby="titre-fonctionnalites" className="mx-auto max-w-7xl px-5 pt-14 md:px-10 md:pt-20">
+      <h2 id="titre-fonctionnalites" className="max-w-3xl text-balance font-serif text-4xl leading-tight tracking-tight text-[#19372c] md:text-6xl">
+        Les fonctionnalités pour votre établissement
+      </h2>
+      <div className="mt-8 grid gap-x-7 gap-y-12 md:mt-12 md:grid-cols-3">
+        {featureGroups.map(group => (
+          <article key={group.title} className="min-w-0">
+            <img
+              src={`https://images.unsplash.com/${group.photo}?auto=format&fit=crop&w=850&q=80`}
+              alt={group.alt}
+              width={850}
+              height={638}
+              loading="lazy"
+              className="aspect-[4/3] w-full rounded-xl bg-stone-200 object-cover"
+              onError={event => {
+                const image = event.currentTarget;
+                if (image.getAttribute("src") !== "/accueil-service.jpg") {
+                  image.src = "/accueil-service.jpg";
+                  image.alt = "Scènes de restauration, de la table au comptoir";
+                }
+              }}
+            />
+            <h3 className="mb-3 mt-6 font-serif text-3xl tracking-tight">{group.title}</h3>
+            {group.items.map(([label, description], index) => (
+              <details key={label} open={index === 0} className="group border-t border-[#cfc7b8]">
+                <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 py-3 font-semibold text-[#203c30] [&::-webkit-details-marker]:hidden">
+                  {label}
+                  <ChevronDown aria-hidden="true" size={18} className="shrink-0 group-open:rotate-180 motion-safe:transition-transform" />
+                </summary>
+                <p className="pb-5 pr-3 text-base leading-relaxed text-[#534f46]">{description}</p>
+              </details>
+            ))}
+          </article>
+        ))}
+      </div>
+    </section>
     <section id="fidelite" className="mt-16 overflow-hidden bg-[#eadfcb] py-8"><div className="mx-auto mb-5 flex max-w-5xl items-center justify-between gap-4 px-5"><h2 className="font-serif text-3xl">Une fidélité à vos couleurs.</h2><button aria-pressed={paused} onClick={()=>setPaused(!paused)} className="text-sm underline">{paused?"Reprendre":"Pause"}</button></div>
       <style>{`@keyframes loyalty-roll{to{transform:translateX(-50%)}}@keyframes appear{from{opacity:.4;transform:translateY(6px)}to{opacity:1;transform:none}}`}</style>
       <div className="flex w-max motion-safe:animate-[loyalty-roll_28s_linear_infinite]" style={{animationPlayState:paused?"paused":"running"}}>{[0,1].map(copy=><div aria-hidden={copy===1} key={copy} className="flex gap-4 pr-4">{["Bistro","Bar à jus","Boulangerie","Grillades"].map((label,n)=><div key={label} style={{background:["#65243c","#1a654d","#85532a","#343333"][n]}} className="w-52 rounded-2xl p-4 text-white"><Gift size={19}/><p className="my-2 font-serif text-2xl">{label}</p><span aria-label="3 tampons sur 5">● ● ● ○ ○</span></div>)}</div>)}</div>
