@@ -63,6 +63,7 @@ export default function LandingPage() {
           <a className="py-3 hover:underline" href="#fonctionnalites">Fonctionnalités</a>
           <a className="py-3 hover:underline" href="#fidelite">Fidélité</a>
           <a className="py-3 hover:underline" href="#tarifs">Tarifs</a>
+          <a className="py-3 hover:underline" href="#demarrer">Démarrer</a>
         </nav>
         <Link className="inline-flex items-center gap-2 rounded-full border border-[#cac4b8] px-5 py-2.5 text-sm font-semibold" to="/login">Se connecter <ArrowUpRight size={16}/></Link>
       </div>
@@ -138,6 +139,30 @@ export default function LandingPage() {
         <button onClick={()=>setPurchase(plan)} className={cta+" mt-auto w-full"}>Acheter · {plan.price} $US</button></article>)}</div>
       <p className="mt-5">Après l’achat, votre clé s’affiche dans Chariow et vous est envoyée par email.</p><Link className="mt-3 inline-block font-semibold underline" to="/inscription">J’ai déjà une clé →</Link></section>
     {purchase && <Checkout plan={purchase} close={()=>setPurchase(null)}/>}
-    <footer className="bg-[#26201a] px-5 py-7 text-center font-serif text-xl text-[#fff8e8]">Café QR</footer>
+    <div className="bg-[#291d16] text-[#fff8ef]" style={{backgroundImage: "radial-gradient(ellipse at 90% 18%, #543122 0, transparent 60%), radial-gradient(ellipse at 0% 100%, #42291e 0, transparent 55%)"}}>
+      <section id="demarrer" aria-labelledby="demarrer-titre" className="mx-auto max-w-4xl px-6 py-20 text-center md:py-28">
+        <h2 id="demarrer-titre" className="font-serif text-[clamp(2.8rem,5.5vw,5.5rem)] font-semibold leading-none tracking-tight">
+          Prêt à digitaliser <em className="block text-[#e8b77e]">votre salle ?</em>
+        </h2>
+        <p className="mx-auto mt-6 max-w-lg text-pretty leading-relaxed text-[#ead9cb] md:text-lg">
+          Choisissez votre formule, activez votre clé et mettez votre menu entre les mains de vos clients.
+        </p>
+        <a href="#tarifs" className="mt-8 inline-flex items-center gap-3 rounded-full bg-[#b34524] px-7 py-4 font-semibold text-white hover:bg-[#9f391c] focus-visible:outline-white">
+          Choisir ma formule <ArrowUpRight size={18} aria-hidden="true" />
+        </a>
+      </section>
+      <footer className="mx-auto max-w-6xl px-6 pb-10">
+        <div className="grid items-start gap-8 border-t border-white/20 pt-9 md:grid-cols-[1.2fr_1fr_auto]">
+          <a href="#accueil" className="flex w-fit items-center gap-3 font-serif text-2xl focus-visible:outline-white">
+            <img src="/icons/cafe-qr-logo.png" alt="" width="48" height="48" className="rounded-lg" /> Café QR
+          </a>
+          <nav aria-label="Liens de pied de page" className="flex flex-col items-start gap-3 text-sm text-[#f1dfcf]">
+            <Link to="/inscription" className="underline-offset-4 hover:underline focus-visible:outline-white">Activer ma clé d’accès</Link>
+            <Link to="/login" className="underline-offset-4 hover:underline focus-visible:outline-white">Se connecter</Link>
+          </nav>
+          <small className="text-[#d7bda9]">© {new Date().getFullYear()} Café QR. Tous droits réservés.</small>
+        </div>
+      </footer>
+    </div>
   </main>;
 }
