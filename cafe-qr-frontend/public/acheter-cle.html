@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Achat d’une clé Café QR</title><link rel="stylesheet" href="https://js.chariowcdn.com/v1/widget.min.css"><style>body{font:16px system-ui;color:#26201a;padding:1rem}#status{color:#544b3e}</style></head>
+<body><p id="status" role="status">Chargement de Chariow…</p>
+<div id="chariow-widget" data-store-domain="washop.mychariow.shop" data-style="tap" data-border-style="rounded" data-cta-width="xs" data-background-color="#FFFFFF" data-cta-animation="shine" data-locale="fr" data-primary-color="#ffcc00"></div>
+<script>
+const offer = new URLSearchParams(location.search).get("offre");
+const product = offer === "monthly" ? "prd_ewciii44" : offer === "annual" ? "prd_u7z2mhpd" : null;
+const statusText = document.getElementById("status");
+if (product) {
+  document.getElementById("chariow-widget").dataset.productId = product;
+  const script = document.createElement("script");
+  script.src = "https://js.chariowcdn.com/v1/widget.min.js";
+  script.async = true;
+  script.onload = () => { statusText.textContent = "Poursuivez votre achat avec Chariow."; };
+  script.onerror = () => { statusText.textContent = "Chariow est indisponible. Fermez cette fenêtre puis réessayez."; };
+  document.head.appendChild(script);
+} else { statusText.textContent = "Choisissez une formule sur la page des tarifs."; }
+</script></body></html>
