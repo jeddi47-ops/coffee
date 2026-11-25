@@ -33,25 +33,36 @@ function Checkout({plan, close}: {plan: Plan; close: () => void}) {
 }
 const cta = "inline-flex min-h-12 items-center justify-center gap-2 rounded-lg bg-[#26201a] px-5 py-3 font-semibold text-white focus-visible:outline-offset-4";
 export default function LandingPage() {
-  const [step, setStep] = useState(0);
-  const [count, setCount] = useState(1);
   const [purchase, setPurchase] = useState<Plan | null>(null);
   const [tool, setTool] = useState(0);
   const [paused, setPaused] = useState(false);
   const selected = operations[tool];
-  const steps = ["À table", "En salle", "Fidélité"];
   return <main className="min-h-screen bg-[#faf6ed] text-[#282118]">
-    <header className="mx-auto flex max-w-6xl items-center justify-between border-b border-[#d5cbb9] px-5 py-4">
-      <span className="flex items-center gap-2 font-serif text-2xl font-bold"><img src="/icons/cafe-qr-logo.png" alt="Café QR" width="64" height="64" className="rounded-lg" /></span>
-      <nav className="flex items-center gap-5 font-semibold"><a className="hidden sm:block" href="#tarifs">Tarifs</a><Link to="/login">Se connecter ↗</Link></nav>
+    <header className="border-b border-[#d5cbb9] bg-[#fffdf8]">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-5 px-5 py-3 md:flex-nowrap md:px-10">
+        <a href="#accueil" aria-label="Café QR, accueil"><img src="/icons/cafe-qr-logo.png" alt="Café QR" width="62" height="62" /></a>
+        <nav aria-label="Navigation principale" className="order-3 flex w-full flex-wrap justify-between gap-x-3 border-t border-[#ded8ca] pt-1 text-sm font-semibold md:order-none md:w-auto md:gap-8 md:border-0">
+          <a className="py-3 hover:underline" href="#accueil">Accueil</a>
+          <a className="py-3 hover:underline" href="#fonctionnalites">Fonctionnalités</a>
+          <a className="py-3 hover:underline" href="#fidelite">Fidélité</a>
+          <a className="py-3 hover:underline" href="#tarifs">Tarifs</a>
+        </nav>
+        <Link className="inline-flex items-center gap-2 rounded-full border border-[#cac4b8] px-5 py-2.5 text-sm font-semibold" to="/login">Se connecter <ArrowUpRight size={16}/></Link>
+      </div>
     </header>
-    <section className="mx-auto grid max-w-6xl items-center gap-8 px-5 py-10 md:grid-cols-2 md:py-20">
-      <div><h1 className="font-serif text-5xl font-bold leading-none tracking-tight md:text-6xl">Vos clients commandent. Votre équipe sait quelle table servir.</h1>
-        <p className="my-6 max-w-md text-lg leading-relaxed">Une carte à scanner, des commandes qui arrivent en salle et une bonne raison pour vos habitués de revenir.</p>
-        <div className="flex flex-wrap items-center gap-5"><Link className={cta} to="/inscription">Créer mon établissement <ArrowUpRight size={18}/></Link><a href="#demo" className="font-semibold underline underline-offset-4">Essayer la démo</a></div></div>
-      <figure><img src="/services.jpg" alt="En salle, au passe et en boulangerie pendant le service" className="aspect-[5/4] w-full rounded-t-[4rem] object-cover md:aspect-square"/><figcaption className="mt-2 text-right font-serif italic">À table, au passe, au comptoir.</figcaption></figure>
+    <section id="accueil" aria-labelledby="accueil-titre" className="relative isolate mx-auto grid min-h-[min(78svh,800px)] place-items-center overflow-hidden bg-stone-900 px-5 py-20 text-center text-white">
+      <img src="/accueil-service.jpg" alt="" fetchPriority="high" className="absolute inset-0 -z-20 h-full w-full object-cover object-center" />
+      <div aria-hidden="true" className="absolute inset-0 -z-10 bg-black/55" />
+      <div className="mx-auto max-w-4xl">
+        <h1 id="accueil-titre" className="text-balance font-serif text-[clamp(2.6rem,5.6vw,5.4rem)] leading-[1.02] tracking-tight">Vos clients commandent. Votre équipe sait quelle table servir.</h1>
+        <p className="mx-auto mt-6 max-w-xl text-pretty text-base leading-relaxed md:text-xl">Une carte à scanner, des commandes qui arrivent en salle et une bonne raison pour vos habitués de revenir.</p>
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <Link className="inline-flex items-center gap-2 rounded-full bg-[#fffaf0] px-6 py-3 font-semibold text-[#19372c]" to="/inscription">Créer mon établissement <ArrowUpRight size={18}/></Link>
+          <a className="rounded-full border border-white/70 bg-black/30 px-6 py-3 font-semibold text-white" href="#tarifs">Voir les tarifs</a>
+        </div>
+      </div>
     </section>
-    <section className="bg-[#203c30] text-[#fff8e8]"><div className="mx-auto grid max-w-6xl gap-7 px-5 py-10 md:grid-cols-3">{features.map(({title,icon:Icon,text})=><article key={title}><Icon className="mb-3 text-[#edd098]"/><h2 className="font-serif text-2xl">{title}</h2><p className="mt-2 max-w-sm leading-relaxed">{text}</p></article>)}</div></section>
+    <section id="fonctionnalites" className="bg-[#203c30] text-[#fff8e8]"><div className="mx-auto grid max-w-6xl gap-7 px-5 py-10 md:grid-cols-3">{features.map(({title,icon:Icon,text})=><article key={title}><Icon className="mb-3 text-[#edd098]"/><h2 className="font-serif text-2xl">{title}</h2><p className="mt-2 max-w-sm leading-relaxed">{text}</p></article>)}</div></section>
     <section className="mx-auto max-w-6xl px-5 pt-16"><h2 className="font-serif text-4xl">Dans les coulisses de votre établissement.</h2>
       <div className="mt-7 grid overflow-hidden rounded-2xl border border-[#d5cbb9] md:grid-cols-2">
         <div className="p-5 sm:p-8"><div className="flex flex-wrap gap-2">{operations.map(({name,Icon},i)=><button key={name} aria-pressed={tool===i} onClick={()=>setTool(i)} className={`flex items-center gap-2 rounded-full border px-3 py-2 text-sm ${tool===i?"bg-[#203c30] text-white":"bg-white"}`}><Icon size={16}/>{name}</button>)}</div>
@@ -59,13 +70,7 @@ export default function LandingPage() {
         <div className="flex items-end p-5 sm:p-8" style={{backgroundImage:"url(/services.jpg)",backgroundSize:"300% auto",backgroundPosition:["left center","center center","center center","right center"][tool]}}>
           <div key={tool} className="w-full rounded-xl bg-white p-4 shadow-xl motion-safe:animate-[appear_.35s_ease-out]"><selected.Icon className="mb-2 text-[#986629]"/>{selected.rows.map(row=><p className="border-t py-2 font-medium" key={row}>{row}</p>)}</div></div>
       </div></section>
-    <section id="demo" className="mx-auto grid max-w-5xl items-center gap-7 px-5 py-14 md:grid-cols-2"><div><h2 className="font-serif text-4xl">Essayez côté table.</h2><p className="mt-3">Simulez une commande et suivez son arrivée en salle.</p></div>
-      <div className="rounded-2xl border border-[#d5cbb9] bg-white p-5 shadow-sm"><p className="text-sm font-semibold text-[#79582d]">Démo · Table 04 · {steps[step]}</p>
-      <div aria-live="polite" className="my-5"><h3 className="font-serif text-3xl">{["Un espresso ?", "Commande à préparer", "Un tampon de plus"][step]}</h3>
-      {step===0 ? <label className="mt-4 flex items-center justify-between">Quantité<select className="rounded border p-2" value={count} onChange={e=>setCount(Number(e.target.value))}>{[1,2,3,4].map(n=><option key={n}>{n}</option>)}</select></label> : <p className="mt-3">{step===1 ? count+" × Espresso · Table 04" : "Après le scan du serveur, la carte client passe à 6 / 10 tampons."}</p>}</div>
-      <button className={cta+" w-full"} onClick={()=>{setStep((step+1)%3);if(step===2)setCount(1)}}>{["Envoyer la commande démo","Simuler le scan fidélité","Recommencer"][step]}</button></div>
-    </section>
-    <section className="overflow-hidden bg-[#eadfcb] py-8"><div className="mx-auto mb-5 flex max-w-5xl items-center justify-between gap-4 px-5"><h2 className="font-serif text-3xl">Une fidélité à vos couleurs.</h2><button aria-pressed={paused} onClick={()=>setPaused(!paused)} className="text-sm underline">{paused?"Reprendre":"Pause"}</button></div>
+    <section id="fidelite" className="mt-16 overflow-hidden bg-[#eadfcb] py-8"><div className="mx-auto mb-5 flex max-w-5xl items-center justify-between gap-4 px-5"><h2 className="font-serif text-3xl">Une fidélité à vos couleurs.</h2><button aria-pressed={paused} onClick={()=>setPaused(!paused)} className="text-sm underline">{paused?"Reprendre":"Pause"}</button></div>
       <style>{`@keyframes loyalty-roll{to{transform:translateX(-50%)}}@keyframes appear{from{opacity:.4;transform:translateY(6px)}to{opacity:1;transform:none}}`}</style>
       <div className="flex w-max motion-safe:animate-[loyalty-roll_28s_linear_infinite]" style={{animationPlayState:paused?"paused":"running"}}>{[0,1].map(copy=><div aria-hidden={copy===1} key={copy} className="flex gap-4 pr-4">{["Bistro","Bar à jus","Boulangerie","Grillades"].map((label,n)=><div key={label} style={{background:["#65243c","#1a654d","#85532a","#343333"][n]}} className="w-52 rounded-2xl p-4 text-white"><Gift size={19}/><p className="my-2 font-serif text-2xl">{label}</p><span aria-label="3 tampons sur 5">● ● ● ○ ○</span></div>)}</div>)}</div>
       <p className="mx-auto mt-5 max-w-5xl px-5">Choisissez le modèle, la règle et la récompense. Les clients qui acceptent les notifications peuvent recevoir un rappel à l’approche de leur récompense.</p></section>
