@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import { CardFace, cardDesigns } from "../components/LoyaltyCardFace";
 import { Link } from "react-router-dom";
-import { ArrowUpRight, Check, X, ChevronDown, Gift } from "lucide-react";
+import { ArrowUpRight, Check, X, ChevronDown } from "lucide-react";
 
 const featureGroups = [
   {
@@ -115,8 +116,21 @@ export default function LandingPage() {
       </div>
     </section>
     <section id="fidelite" className="mt-16 overflow-hidden bg-[#eadfcb] py-8"><div className="mx-auto mb-5 flex max-w-5xl items-center justify-between gap-4 px-5"><h2 className="font-serif text-3xl">Une fidélité à vos couleurs.</h2><button aria-pressed={paused} onClick={()=>setPaused(!paused)} className="text-sm underline">{paused?"Reprendre":"Pause"}</button></div>
-      <style>{`@keyframes loyalty-roll{to{transform:translateX(-50%)}}@keyframes appear{from{opacity:.4;transform:translateY(6px)}to{opacity:1;transform:none}}`}</style>
-      <div className="flex w-max motion-safe:animate-[loyalty-roll_28s_linear_infinite]" style={{animationPlayState:paused?"paused":"running"}}>{[0,1].map(copy=><div aria-hidden={copy===1} key={copy} className="flex gap-4 pr-4">{["Bistro","Bar à jus","Boulangerie","Grillades"].map((label,n)=><div key={label} style={{background:["#65243c","#1a654d","#85532a","#343333"][n]}} className="w-52 rounded-2xl p-4 text-white"><Gift size={19}/><p className="my-2 font-serif text-2xl">{label}</p><span aria-label="3 tampons sur 5">● ● ● ○ ○</span></div>)}</div>)}</div>
+      <style>{`@keyframes loyalty-roll{to{transform:translateX(-50%)}}`}</style>
+      <div className="overflow-x-auto">
+        <div className="flex w-max motion-safe:animate-[loyalty-roll_95s_linear_infinite]" style={{ animationPlayState: paused ? "paused" : "running" }}>
+          {[0, 1].map(copy => (
+            <div key={copy} aria-hidden={copy === 1} className={`flex gap-5 py-3 pr-5 ${copy === 1 ? "motion-reduce:hidden" : ""}`}>
+              {cardDesigns.map(design => (
+                <div key={design.color} className="w-[min(80vw,19rem)] shrink-0">
+                  <CardFace color={design.color} name={design.name} stamps={3} target={5}
+                    reward="Une spécialité offerte" rule="Un passage = un tampon" />
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
       <p className="mx-auto mt-5 max-w-5xl px-5">Choisissez le modèle, la règle et la récompense. Les clients qui acceptent les notifications peuvent recevoir un rappel à l’approche de leur récompense.</p></section>
     <section id="tarifs" className="mx-auto max-w-5xl px-5 py-16"><h2 className="font-serif text-4xl">Toutes les fonctionnalités. À vous de choisir la durée.</h2>
       <div className="mt-8 grid gap-5 sm:grid-cols-2">{plans.map(plan=><article key={plan.id} className="flex flex-col rounded-2xl border border-[#cfc2ae] bg-white p-6"><h3 className="text-xl font-semibold">{plan.label}</h3><p className="my-3"><strong className="font-serif text-5xl">{plan.price} $US</strong> / {plan.unit}</p><p>{plan.duration} d’accès{plan.id==="annual"?" · 10 $US d’économie sur 12 mois":""}</p>
